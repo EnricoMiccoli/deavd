@@ -2,10 +2,10 @@
 
 # EAV
 class Entity(object):
-    def __init__(self, name, path, tags=[]):
-        self.tags = tags
+    def __init__(self, name, path, tags=None):
         self.name = name
         self.path = path
+        self.tags = tags or set()
 
     def __repr__(self):
         return str((self.name, self.path, self.tags))
@@ -14,51 +14,50 @@ class Entity(object):
         return self.name + ': ' + ', '.join(str(tag) for tag in self.tags)
 
     def addtag(self, newtag):
-        self.tags.append(newtag)
+        self.tags.add(newtag)
 
 class Tag(object):
-    def __init__(self, name, attributes=[]):
+    def __init__(self, name, attributes=None):
         self.name = name
-        self.attributes = attributes
+        self.attributes = attributes or {}
 
     def __repr__(self):
         return str((self.name, self.attributes))
 
     def __str__(self):
-        return self.name + '{' * bool(self.attributes) + ', '.join(str(att) for att in self.attributes) + '}' * bool(self.attributes)
+        return self.name + \
+            '{' * bool(self.attributes) + \
+            ', '.join(':'.join([att,self.attributes[att]]) for att in self.attributes) + \
+            '}' * bool(self.attributes)
 
-    def addatt(self, newatt):
-        self.tags.append(newatt)
+    def addatt(self, newatt, val):
+        self.tags[newatt] = val # check against overwriting
 
-class Attribute(object):
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-    def __repr__(self):
-        return str((self.name, self.value))
-
-    def __str__(self):
-        return self.name + ':' + self.value
-
-    def addval(self, newval):
-        self.value = newval # needs check against overwriting
+    def match(self, other):
+        return self.name == other.name and set(self.attributes.items()) <= set(other.attributes.items())
 
 class Bucket(set):
     """ Set of entities """
     def __init__(self, name):
+        super().__init__()
         self.name = name
 
     def __str__(self):
-        return self.name + ' <{ ' + '; '.join(str(ent) for ent in self) + ' }>'
+        return self.name + ' <{\n' + ';\n'.join(str(ent) for ent in self) + '\n}>'
+
+    def add(self, newent):
+        if not isinstance(newent, Entity):
+            raise ValueError('Cannot add %s to Bucket' % newent)
+        if newent in self:
+            raise BucketAddException(newent)
+        super().add(newent)
 
     def query(self, tag):
-        if tag.attributes == []:
-            return [ent for ent in self if tag.name in (tag.name for tag in  ent.tags)]
-#        else:
-#            return [ent for ent in self if
-#                    tag.name in (tag.name for tag in  ent.tags) and
-#                    set(tag.attributes) < set(ent.attributes)]
+        for ent in self:
+            for x in ent.tags:
+                if tag.match(x):
+                    yield ent
+                    break
 
 # EXCEPTIONS
 class TagAddError(Exception):
@@ -90,23 +89,31 @@ class ValAddError(Exception):
     def __str__(self):
         return "Can't add " + self.val + ' to ' + self.att.name
 
+class BucketAddException(Exception):
+    def __init__(self, ent):
+        self.ent = ent
+
+    def __str__(self):
+        return "Duplicate entity " + self.ent.name + '; Cannot add!' 
+
 def main():
-    pippo = Entity('Pippo', './pippo', tags=[
-        Tag('animale', attributes=[Attribute('specie', 'supercane')]),
+    pippo = Entity('Pippo', './pippo')
+    pippo.tags.update([
+        Tag('animale', attributes={'specie': 'supercane'}),
         Tag('parla'),
     ])
-    pluto = Entity('Pluto', './pluto', tags=[
-        Tag('animale', attributes=[Attribute('specie', 'cane')]),
+    pluto = Entity('Pluto', './pluto')
+    pluto.tags.update([
+        Tag('animale', attributes={'specie': 'cane'}),
         Tag('muto'),
-        Tag('personaggio', attributes=[Attribute('esistente', 'no')])
+        Tag('personaggio', attributes={'esistente': 'no'})
     ])
+    canary = Entity('canary', 'canary')
     animali = Bucket('Animali')
-    animali.update(x for x in [pluto, pippo])
-    for animale in animali:
-        print(animale)
+    animali.update(x for x in [pluto, pippo, canary])
+    print(animali)
 
-    print(animali.query(Tag('parla',)))
-#   print(animali.query(Tag('personaggio', attributes=[Attribute('esistente', 'no')])))
+    print(list(animali.query(Tag('parla'))))
 
 if __name__ == '__main__':
     main()
