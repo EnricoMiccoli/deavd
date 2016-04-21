@@ -1,4 +1,7 @@
 # Deductive entity-attribute-value database
+import functools as f
+OR = 1
+AND = 0
 
 # EAV
 class Entity(object):
@@ -52,12 +55,41 @@ class Bucket(set):
             raise BucketAddException(newent)
         super().add(newent)
 
-    def query(self, tag):
+    def querytag(self, tag):
+        """ Search for all Entities: tag in self """
         for ent in self:
             for x in ent.tags:
                 if tag.match(x):
                     yield ent
                     break
+
+    def query(self, query):
+        """ Takes standard polish-venetian query """
+        # polish-venetian query: (OR, [a,b,c])
+        # (AND, [OR, [a,b,c]), (AND, [n,k,d]])
+        print('---- call ----')
+
+        u = lambda x,y: x | y
+        n = lambda x,y: x & y
+
+        def queryop(operator):
+            result = []
+            for request in query[1]:
+                if isinstance(request, Tag):
+                    print('tag')
+                    result.append(set(self.querytag(request)))
+                else:
+                    print('operator')
+                    return self.query(request)
+
+            return (f.reduce(operator, result))
+
+        if query[0] == OR:
+            return queryop(u)
+        elif query[0] == AND:
+            return queryop(n)
+        else:
+            raise ValueError('Logic operator not recognized: %s' % query[0])
 
 # EXCEPTIONS
 class TagAddError(Exception):
@@ -111,9 +143,9 @@ def main():
     canary = Entity('canary', 'canary')
     animali = Bucket('Animali')
     animali.update(x for x in [pluto, pippo, canary])
-    print(animali)
 
-    print(list(animali.query(Tag('parla'))))
+    query = (OR, [Tag('parla'), Tag('muto'), (OR, [Tag('animale'), Tag('personaggio')])])
+    print(animali.query(query))
 
 if __name__ == '__main__':
     main()
