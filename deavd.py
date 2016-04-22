@@ -1,5 +1,7 @@
 # Deductive entity-attribute-value database
 import functools as f
+import pickle
+
 OR = 1
 AND = 0
 
@@ -48,6 +50,9 @@ class Bucket(set):
     def __str__(self):
         return self.name + ' <{\n' + ';\n'.join(str(ent) for ent in self) + '\n}>'
 
+    def freeze(self):
+        return FrozenBucket(self.name, self)
+
     def add(self, newent):
         if not isinstance(newent, Entity):
             raise ValueError('Cannot add %s to Bucket' % newent)
@@ -64,10 +69,8 @@ class Bucket(set):
                     break
 
     def query(self, query):
-        """ Takes standard polish-venetian query """
-        # polish-venetian query: (OR, [a,b,c])
-        # (AND, [OR, [a,b,c]), (AND, [n,k,d]])
-        print('---- call ----')
+        """ Takes standard polish query """
+        # polish query: (OR, [a,b,c])  (AND, [OR, [a,b,c]), (AND, [n,k,d]])
 
         u = lambda x,y: x | y
         n = lambda x,y: x & y
@@ -76,10 +79,8 @@ class Bucket(set):
             result = []
             for request in query[1]:
                 if isinstance(request, Tag):
-                    print('tag')
                     result.append(set(self.querytag(request)))
                 else:
-                    print('operator')
                     return self.query(request)
 
             return (f.reduce(operator, result))
@@ -90,6 +91,24 @@ class Bucket(set):
             return queryop(n)
         else:
             raise ValueError('Logic operator not recognized: %s' % query[0])
+
+    def dump(self, outfile):
+        frozen = self.freeze()
+        pickle.dump(frozen, outfile)
+
+class FrozenBucket(object):
+    def __init__(self, name, ents):
+        self.name = name
+        self.ents = frozenset(ents)
+
+    def thaw(self):
+        b = Bucket(self.name)
+        b.update(self.ents)
+        return b
+
+def loadbucket(infile):
+    frozenbucket = pickle.load(infile)
+    return frozenbucket.thaw()
 
 # EXCEPTIONS
 class TagAddError(Exception):
@@ -142,10 +161,15 @@ def main():
     ])
     canary = Entity('canary', 'canary')
     animali = Bucket('Animali')
+
     animali.update(x for x in [pluto, pippo, canary])
 
-    query = (OR, [Tag('parla'), Tag('muto'), (OR, [Tag('animale'), Tag('personaggio')])])
-    print(animali.query(query))
+    with open('animali', 'wb') as outfile:
+        animali.dump(outfile)
+
+    with open('animali', 'rb') as infile:
+        a = loadbucket(infile)
+
 
 if __name__ == '__main__':
     main()
