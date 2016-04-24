@@ -98,9 +98,10 @@ class Bucket(set):
         else:
             raise ValueError('Logic operator not recognized: %s' % query[0])
 
-    def dump(self, outfile):
-        frozen = self.freeze()
-        pickle.dump(frozen, outfile)
+    def dump(self, path):
+        with open(path, 'wb') as outfile:
+            frozen = self.freeze()
+            pickle.dump(frozen, outfile)
 
 class FrozenBucket(object):
     """ A storage only Bucket() """
@@ -113,8 +114,9 @@ class FrozenBucket(object):
         b.update(self.ents)
         return b
 
-def loadbucket(infile):
-    frozenbucket = pickle.load(infile)
+def loadbucket(path):
+    with open(path, 'rb') as infile:
+        frozenbucket = pickle.load(infile)
     return frozenbucket.thaw()
 
 # EXCEPTIONS
@@ -155,30 +157,7 @@ class BucketAddException(Exception):
         return "Duplicate entity " + self.ent.name + '; Cannot add!' 
 
 def main():
-    pippo = Entity('Pippo', './pippo')
-    pippo.tags.update([
-        Tag('animale', attributes={'specie': 'supercane'}),
-        Tag('parla'),
-    ])
-    pluto = Entity('Pluto', './pluto')
-    pluto.tags.update([
-        Tag('animale', attributes={'specie': 'cane'}),
-        Tag('muto'),
-        Tag('personaggio', attributes={'esistente': 'no'})
-    ])
-    sasso = Entity('sasso', './sasso')
-    animali = Bucket('Animali')
-
-    animali.update(x for x in [pluto, pippo, sasso])
-
-    with open('animali', 'wb') as outfile:
-        animali.dump(outfile)
-
-    with open('animali', 'rb') as infile:
-        a = loadbucket(infile)
-
-    query = (NOT, [Tag('animale')])
-    print(animali.query(query))
+    print('hi')
 
 if __name__ == '__main__':
     main()
