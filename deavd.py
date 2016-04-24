@@ -75,19 +75,17 @@ class Bucket(set):
 
         u = (lambda x: x, lambda x,y: x | y)
         n = (lambda x: x, lambda x,y: x & y)
-        without = (lambda x: self.difference(x), lambda x,y: x | y)
-
+        without = (lambda x: self.difference(x), lambda x,y: x & y)
 
         def queryop(arg):
             prefunc, operator = arg
             result = []
             for request in query[1]:
                 if isinstance(request, Tag):
-                    result.append(prefunc(set(self.querytag(request))))
+                    result.append(set(self.querytag(request)))
                 else:
-                    return self.query(request)
-
-            return (f.reduce(operator, result))
+                    result.append(self.query(request))
+            return f.reduce(operator, map(prefunc, result))
 
         if query[0] == OR:
             return queryop(u)
@@ -157,7 +155,17 @@ class BucketAddException(Exception):
         return "Duplicate entity " + self.ent.name + '; Cannot add!' 
 
 def main():
-    print('hi')
+    b = loadbucket('shapes')
+
+    query = (AND, [
+                    (NOT, [Tag('red'), Tag('blue')]),
+                    (OR, [Tag('square'), Tag('star')])
+                ]
+            )
+
+    c = Bucket('Result of query')
+    c.update(b.query(query))
+    print(c)
 
 if __name__ == '__main__':
     main()
