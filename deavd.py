@@ -2,8 +2,9 @@
 import functools as f
 import pickle
 
-OR = 1
 AND = 0
+OR = 1
+NOT = 2
 
 # EAV
 class Entity(object):
@@ -72,14 +73,17 @@ class Bucket(set):
         """ Takes standard polish query """
         # polish query: (OR, [a,b,c])  (AND, [OR, [a,b,c]), (AND, [n,k,d]])
 
-        u = lambda x,y: x | y
-        n = lambda x,y: x & y
+        u = (lambda x: x, lambda x,y: x | y)
+        n = (lambda x: x, lambda x,y: x & y)
+        without = (lambda x: self.difference(x), lambda x,y: x | y)
 
-        def queryop(operator):
+
+        def queryop(arg):
+            prefunc, operator = arg
             result = []
             for request in query[1]:
                 if isinstance(request, Tag):
-                    result.append(set(self.querytag(request)))
+                    result.append(prefunc(set(self.querytag(request))))
                 else:
                     return self.query(request)
 
@@ -89,6 +93,8 @@ class Bucket(set):
             return queryop(u)
         elif query[0] == AND:
             return queryop(n)
+        elif query[0] == NOT:
+            return queryop(without)
         else:
             raise ValueError('Logic operator not recognized: %s' % query[0])
 
@@ -97,6 +103,7 @@ class Bucket(set):
         pickle.dump(frozen, outfile)
 
 class FrozenBucket(object):
+    """ A storage only Bucket() """
     def __init__(self, name, ents):
         self.name = name
         self.ents = frozenset(ents)
@@ -159,10 +166,10 @@ def main():
         Tag('muto'),
         Tag('personaggio', attributes={'esistente': 'no'})
     ])
-    canary = Entity('canary', 'canary')
+    sasso = Entity('sasso', './sasso')
     animali = Bucket('Animali')
 
-    animali.update(x for x in [pluto, pippo, canary])
+    animali.update(x for x in [pluto, pippo, sasso])
 
     with open('animali', 'wb') as outfile:
         animali.dump(outfile)
@@ -170,6 +177,8 @@ def main():
     with open('animali', 'rb') as infile:
         a = loadbucket(infile)
 
+    query = (NOT, [Tag('animale')])
+    print(animali.query(query))
 
 if __name__ == '__main__':
     main()
