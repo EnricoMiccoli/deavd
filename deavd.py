@@ -1,6 +1,7 @@
 # Deductive entity-attribute-value database
 import functools as f
 import pickle
+import yaml
 
 AND = 0
 OR = 1
@@ -12,6 +13,8 @@ class Entity(object):
         self.name = name
         self.path = path
         self.tags = tags or set()
+        self.coherence = {'blacklist':[], 'paradoxes':[]}
+        self.inference = None
 
     def __repr__(self):
         return str((self.name, self.path, self.tags))
@@ -20,7 +23,10 @@ class Entity(object):
         return self.name + ': ' + ', '.join(str(tag) for tag in self.tags)
 
     def addtag(self, newtag):
-        self.tags.add(newtag)
+        if newtag in self.coherence['blacklist']:
+            raise TagBlacklistedException(newtag)
+        else:
+            self.tags.add(newtag)
 
 class Tag(object):
     def __init__(self, name, attributes=None):
@@ -44,9 +50,11 @@ class Tag(object):
 
 class Bucket(set):
     """ Set of entities """
-    def __init__(self, name):
+    def __init__(self, name, coherence=None, inference=None):
         super().__init__()
         self.name = name
+        self.coherence = coherence
+        self.inference = inference
 
     def __str__(self):
         return self.name + ' <{\n' + ';\n'.join(str(ent) for ent in self) + '\n}>'
@@ -59,7 +67,38 @@ class Bucket(set):
             raise ValueError('Cannot add %s to Bucket' % newent)
         if newent in self:
             raise BucketAddException(newent)
+        newent.coherence = self.coherence
+        newent.inference = self.inference
         super().add(newent)
+
+    def addcoherence(self, path):
+        """ Reads and serializes yaml ruletable """
+        assert path.endswith('.yaml') # worst fileformat check ever
+        with open(path, 'r') as infile:
+            coherence = yaml.load(infile)
+
+        self.coherence = coherence
+        for ent in self:
+            ent.coherence = coherence
+
+        fails = self.coherence_check()
+        if fails:
+            raise CoherenceCheckFail(fails)
+
+    def coherence_check(self):
+        blacklisted = []
+        paradoxes = []
+        for ent in self:
+            for tag in ent.tags:
+                if tag.name in self.coherence['blacklist']:
+                    blacklisted += (ent, tag) 
+            for paradox in self.coherence['paradoxes']: # very inefficient
+                if set(paradox) & ent.tags:
+                    paradoxes += (ent, set(ent.tags) & set(paradoxes))
+        if blacklisted or paradoxes:
+            return (blacklisted, paradoxes)
+        else:
+            return None
 
     def querytag(self, tag):
         """ Search for all Entities: tag in self """
@@ -147,16 +186,41 @@ class ValAddError(Exception):
     def __str__(self):
         return "Can't add " + self.val + ' to ' + self.att.name
 
-class BucketAddException(Exception):
+class BucketDuplicateException(Exception):
     def __init__(self, ent):
         self.ent = ent
 
     def __str__(self):
-        return "Duplicate entity " + self.ent.name + '; Cannot add!' 
+        return "Duplicate binary " + self.ent.name + '; Cannot add!' 
+
+class TagBlacklistedException(Exception):
+    def __init__(self, tag):
+        self.ent = ent
+
+    def __str__(self):
+        return 'Tag "' + tag.name + '" is blacklisted!'
+
+class CoherenceCheckFail(Exception):
+    def __init__(self, fails):
+        self.fails = fails
+
+    def __str__(self):
+        return 'Coherence fail:' + \
+            '\nBlacklisted:' * bool(self.fails[0]) + \
+            '\n'.join(self.fails[0]) + \
+            '\nParadoxes:' * bool(self.fails[1]) + \
+            '\n'.joind(self.fails[1])
 
 def main():
     b = loadbucket('shapes')
+    b.addcoherence('shapes_coherence.yaml')
 
+    
+    b.add(Entity('triangle','triangle'))
+    [x.addtag(Tag('triangle')) for x in b if x.name == 'triangle']
+    b.addcoherence('shapes_coherence.yaml')
+
+"""
     query = (AND, [
                     (NOT, [Tag('red'), Tag('blue')]),
                     (OR, [Tag('square'), Tag('star')])
@@ -166,6 +230,20 @@ def main():
     c = Bucket('Result of query')
     c.update(b.query(query))
     print(c)
+"""
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
+
+
+
+
+
+
+
+
