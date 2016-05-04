@@ -58,6 +58,9 @@ class Bucket(set):
 
     def __str__(self):
         return self.name + ' <{\n' + ';\n'.join(str(ent) for ent in self) + '\n}>'
+    
+    def nice(self):
+        return str(self)
 
     def freeze(self):
         return FrozenBucket(self.name, self)

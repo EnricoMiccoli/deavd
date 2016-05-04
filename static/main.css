@@ -1,0 +1,9 @@
+body {
+    color: red;
+}
+#footer{
+    clear: both;
+    padding: 15px;
+    text-align: center;
+    border-top:  thin solid grey;
+}

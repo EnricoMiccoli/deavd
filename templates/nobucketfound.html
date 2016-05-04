@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href=/static/main.css">
+    <title>Bucket not Found!</title>
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+    <h1>Bucket not found!</h1>
+    <p>Bucket <code>{{ bucketname }}</code> was not found on the server.</p>
+    {{ super() }}
+{% endblock %}}

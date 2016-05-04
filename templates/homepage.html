@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="/static/main.css"/>
+    <title>Buckets</title>
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+    <h1>Pick a Bucket</h1>
+    <ul id="bucket_picker">
+        {% for buck in buckets %}
+        <li><a href="b/{{ buck }}">{{ buck }}</a></li>
+        {% endfor %}
+    </ul>
+    {{ super() }}
+{% endblock %}
