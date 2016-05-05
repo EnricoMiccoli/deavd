@@ -1,0 +1,23 @@
+@import 'colors';
+#result{
+    list-style-type: none;
+    padding: 50px;
+}
+.result-item{
+    display: block;
+    width: 230px;
+    height: 260px;
+    float: left;
+    border: thin solid $divider;
+    background-color: #fff;
+    margin: 5px;
+    padding: 10px;
+    img{
+        width: 200px;
+        display: block;
+        margin: auto;
+    }
+    h3{
+        text-align: center;
+    }
+}

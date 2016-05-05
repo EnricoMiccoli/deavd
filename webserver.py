@@ -1,9 +1,12 @@
 from flask import Flask
 from flask import request
 from flask import render_template
+from flask.ext.scss import Scss
 from deavd import * # necessary to properly unpickle
 
 app = Flask(__name__)
+app.debug = True
+Scss(app, asset_dir='./')
 
 @app.route('/')
 def homepage():
@@ -39,8 +42,6 @@ def bucketquery(bucketname=None):
         return render_template('bucketpage.html', bucket=result, prevsearch=stringquery)
 
 
-
-app.debug = True
 
 if __name__ == '__main__':
     app.run()
