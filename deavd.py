@@ -159,6 +159,13 @@ def loadbucket(path):
         frozenbucket = pickle.load(infile)
     return frozenbucket.thaw()
 
+def parsequery(querystring):
+    # needs a lot of implementing
+    query = querystring.split()
+    tags = [Tag(tagname[1:]) for tagname in query] # sliced to remove leading '#'
+    return (OR, tags)
+
+
 # EXCEPTIONS
 class TagAddError(Exception):
     def __init__(self, ent, tag):

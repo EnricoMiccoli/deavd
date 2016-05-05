@@ -8,7 +8,10 @@
 
 {% block body %}
     <h1>{{ bucket.name }}</h1>
-    <form id="searchbox"><input type="text"></form>
+    <form method="POST" id="searchbox">
+        <input type="text" name="query">
+        <input type="submit" name="querybutton" value="Send">
+    </form>
     <ul id="result">
         {% for ent in bucket %}
             <li>
