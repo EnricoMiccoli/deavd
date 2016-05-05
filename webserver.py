@@ -23,14 +23,20 @@ def bucketquery(bucketname=None):
         bucket = loadbucket(bucketname)
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
-    query = parsequery(request.form['query'])
-    assert len(query) > 0
-    result = Bucket('result')
-    try:
-        result.update(bucket.query(query))
-    except ValueError:
-        return 'Invalid operator in query ' + query
-    return render_template('bucketpage.html', bucket=result)
+
+    stringquery = request.form['query']
+    if not stringquery: # checks for empty query
+        return render_template('bucketpage.html', bucket=bucket, prevsearch='')
+    else:
+        query = parsequery(stringquery)
+        assert len(query) > 0
+
+        result = Bucket('Result of your query')
+        try:
+            result.update(bucket.query(query))
+        except ValueError:
+            return 'Invalid operator in query ' + query
+        return render_template('bucketpage.html', bucket=result, prevsearch=stringquery)
 
 
 
