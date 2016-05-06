@@ -7,17 +7,20 @@
 {% endblock %}
 
 {% block body %}
-    <h1>{{ bucket.name }}</h1>
+    <h1 id="titlebar">{{ bucket.name }}</h1>
     <form method="POST" id="searchbox">
+        To search enter your query below <br/>
         <input type="text" name="query" value="{{ prevsearch }}">
         <input type="submit" name="querybutton" value="Send">
     </form>
     <ul id="result">
         {% for ent in bucket %}
-            <li class="result-item">
-                <h3>{{ ent.name }}</h3>
-                <img src="/static/{{ ent.path }}" alt="image for {{ ent.name }}">
-            </li>
+            <a href="#">
+                <li class="result-item">
+                    <h3>{{ ent.name }}</h3>
+                    <img src="/static/{{ ent.path }}" alt="image for {{ ent.name }}">
+                </li>
+            </a>
         {% endfor %}
     </ul>
 {% endblock %}
