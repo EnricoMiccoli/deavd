@@ -34,8 +34,8 @@ def bucketquery(bucketname=None):
         query = parsequery(stringquery)
         result = Bucket('Results of your query')
         try:
-            result.update(bucket.query(query))
-        except ValueError:
+            result.update((key, bucket[key]) for key in bucket.query(query))
+        except QueryError:
             return 'Invalid operator in query ' + query
 
         # check if empty

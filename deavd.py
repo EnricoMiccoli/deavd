@@ -99,7 +99,7 @@ class Bucket(dict):
         elif query[0] == NOT:
             return queryop(without)
         else:
-            raise ValueError('Logic operator not recognized: %s' % query[0])
+            raise QueryError(query)
 
     def dump(self, path):
         with open(path, 'wb') as outfile:
@@ -161,6 +161,13 @@ class BucketDuplicateException(Exception):
 
     def __str__(self):
         return "Duplicate binary " + self.ent.name + '; Cannot add!' 
+
+class QueryError(Exception):
+    def __init__(self, query):
+        self.query = query
+
+    def __str__(self):
+        return 'Logic operator not recognized: %s' % query[0]
 
 class TagBlacklistedException(Exception):
     def __init__(self, tag):
