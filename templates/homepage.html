@@ -5,7 +5,8 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Pick a Bucket</h1>
+    <h1 id="titlebar">Pick a Bucket</h1>
+    To explore a bucket pick one from the list below
     <ul id="bucket_picker">
         {% for buck in buckets %}
         <li><a href="b/{{ buck }}">{{ buck }}</a></li>
