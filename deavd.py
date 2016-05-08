@@ -48,7 +48,7 @@ class Tag(object):
     def match(self, other):
         return self.name == other.name and set(self.attributes.items()) <= set(other.attributes.items())
 
-class Bucket(set):
+class Bucket(dict):
     """ Set of entities """
     def __init__(self, name, coherence=None, inference=None):
         super().__init__()
@@ -140,24 +140,11 @@ class Bucket(set):
 
     def dump(self, path):
         with open(path, 'wb') as outfile:
-            frozen = self.freeze()
-            pickle.dump(frozen, outfile)
-
-class FrozenBucket(object):
-    """ A storage only Bucket() """
-    def __init__(self, name, ents):
-        self.name = name
-        self.ents = frozenset(ents)
-
-    def thaw(self):
-        b = Bucket(self.name)
-        b.update(self.ents)
-        return b
+            pickle.dump(self, outfile)
 
 def loadbucket(path):
     with open(path, 'rb') as infile:
-        frozenbucket = pickle.load(infile)
-    return frozenbucket.thaw()
+        return pickle.load(infile)
 
 def parsequery(querystring):
     words = querystring.split()
@@ -230,14 +217,6 @@ class CoherenceCheckFail(Exception):
 
 def main():
     b = loadbucket('shapes')
-    b.addcoherence('shapes_coherence.yaml')
-
-    
-    b.add(Entity('triangle','triangle'))
-    [x.addtag(Tag('triangle')) for x in b if x.name == 'triangle']
-    b.addcoherence('shapes_coherence.yaml')
-
-"""
     query = (AND, [
                     (NOT, [Tag('red'), Tag('blue')]),
                     (OR, [Tag('square'), Tag('star')])
@@ -247,7 +226,6 @@ def main():
     c = Bucket('Result of query')
     c.update(b.query(query))
     print(c)
-"""
 
 if __name__ == '__main__':
     main()
