@@ -1,13 +1,10 @@
 @import 'colors';
-#titlebar{
-    color: $white;
-    background-color: $main500;
-    padding: 10px;
-    border-top: 10px solid $main700;
-}
 #result{
     list-style-type: none;
     overflow: hidden;
+    a{
+        color: $main-text;
+    }
 }
 #emptymessage{
     font-size: 20px;
@@ -42,7 +39,4 @@
 }
 input{
     font-family: 'Roboto';
-}
-a{
-    color: $main-text;
 }

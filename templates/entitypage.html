@@ -1,0 +1,15 @@
+{% extends "base.html"%}
+{% block head %}
+    <link rel="stylesheet" href="/static/entitypage.css">
+    <title>{{ ent.name }}</title>
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+    <h1 id="titlebar">{{ ent.name }}</h1>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+{% endblock %}
+

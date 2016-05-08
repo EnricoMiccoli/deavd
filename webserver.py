@@ -32,8 +32,6 @@ def bucketquery(bucketname=None):
         return render_template('bucketpage.html', bucket=bucket, prevsearch='')
     else:
         query = parsequery(stringquery)
-        assert len(query) > 0
-
         result = Bucket('Results of your query')
         try:
             result.update(bucket.query(query))
@@ -46,7 +44,10 @@ def bucketquery(bucketname=None):
         else: 
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
-
+@app.route('/b/<bucketname>/<entname>')
+def entpage(bucketname=None, entname=None):
+    entity = Entity('Test', 'test')
+    return render_template('entitypage.html', ent=entity)
 
 if __name__ == '__main__':
     app.run()

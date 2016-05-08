@@ -17,3 +17,10 @@ a{
     border-top: thin solid $divider;
     color: $second-text;
 }
+#titlebar{
+    color: $white;
+    background-color: $main500;
+    padding: 10px;
+    border-top: 10px solid $main700;
+}
+
