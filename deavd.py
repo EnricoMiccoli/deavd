@@ -59,57 +59,18 @@ class Bucket(dict):
     def __str__(self):
         return self.name + ' <{\n' + ';\n'.join(str(ent) for ent in self) + '\n}>'
     
-    def nice(self):
-        return str(self)
-
-    def freeze(self):
-        return FrozenBucket(self.name, self)
-
-    def add(self, newent):
-        if not isinstance(newent, Entity):
-            raise ValueError('Cannot add %s to Bucket' % newent)
-        if newent in self:
-            raise BucketAddException(newent)
-        newent.coherence = self.coherence
-        newent.inference = self.inference
-        super().add(newent)
-
-    def addcoherence(self, path):
-        """ Reads and serializes yaml ruletable """
-        assert path.endswith('.yaml') # worst fileformat check ever
-        with open(path, 'r') as infile:
-            coherence = yaml.load(infile)
-
-        self.coherence = coherence
-        for ent in self:
-            ent.coherence = coherence
-
-        fails = self.coherence_check()
-        if fails:
-            raise CoherenceCheckFail(fails)
-
-    def coherence_check(self):
-        blacklisted = []
-        paradoxes = []
-        for ent in self:
-            for tag in ent.tags:
-                if tag.name in self.coherence['blacklist']:
-                    blacklisted += (ent, tag) 
-            for paradox in self.coherence['paradoxes']: # very inefficient
-                if set(paradox) & ent.tags:
-                    paradoxes += (ent, set(ent.tags) & set(paradoxes))
-        if blacklisted or paradoxes:
-            return (blacklisted, paradoxes)
-        else:
-            return None
-
     def querytag(self, tag):
         """ Search for all Entities: tag in self """
-        for ent in self:
-            for x in ent.tags:
+        for entkey in self:
+            for x in self[entkey].tags:
+                assert isinstance(x, Tag)
                 if tag.match(x):
-                    yield ent
+                    assert isinstance(entkey, str)
+                    yield entkey
                     break
+
+    def difference(self, other):
+        return set(self).difference(set(other))
 
     def query(self, query):
         """ Takes standard polish query """
@@ -127,7 +88,9 @@ class Bucket(dict):
                     result.append(set(self.querytag(request)))
                 else:
                     result.append(self.query(request))
-            return f.reduce(operator, map(prefunc, result))
+            output =  f.reduce(operator, map(prefunc, result))
+            assert isinstance(output, set)
+            return output # returns set of keys that satisfy query
 
         if query[0] == OR:
             return queryop(u)
@@ -144,7 +107,9 @@ class Bucket(dict):
 
 def loadbucket(path):
     with open(path, 'rb') as infile:
-        return pickle.load(infile)
+        bucket =  pickle.load(infile)
+        assert isinstance(bucket, Bucket)
+        return bucket
 
 def parsequery(querystring):
     words = querystring.split()
@@ -223,8 +188,9 @@ def main():
                 ]
             )
 
-    c = Bucket('Result of query')
-    c.update(b.query(query))
+    goodkeys = b.query(query)
+    c = Bucket('results')
+    c.update((key, b[key]) for key in goodkeys)
     print(c)
 
 if __name__ == '__main__':
