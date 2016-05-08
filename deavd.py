@@ -160,10 +160,17 @@ def loadbucket(path):
     return frozenbucket.thaw()
 
 def parsequery(querystring):
-    # needs a lot of implementing
-    query = querystring.split()
-    tags = [Tag(tagname[1:]) for tagname in query] # sliced to remove leading '#'
-    return (OR, tags)
+    words = querystring.split()
+    ands = []
+    for word in words:
+        if word[0] == '-':
+            ands.append((NOT, [Tag(word[1:])]))
+        elif '/' in word:
+            ors = word.split('/')
+            ands.append((OR, [Tag(x) for x in ors]))
+        else:
+            ands.append(Tag(word))
+    return (AND, ands)
 
 
 # EXCEPTIONS
