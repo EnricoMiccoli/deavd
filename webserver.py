@@ -34,12 +34,17 @@ def bucketquery(bucketname=None):
         query = parsequery(stringquery)
         assert len(query) > 0
 
-        result = Bucket('Result of your query')
+        result = Bucket('Results of your query')
         try:
             result.update(bucket.query(query))
         except ValueError:
             return 'Invalid operator in query ' + query
-        return render_template('bucketpage.html', bucket=result, prevsearch=stringquery)
+
+        # check if empty
+        if result:
+            return render_template('bucketpage.html', bucket=result, prevsearch=stringquery)
+        else: 
+            return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
 
 

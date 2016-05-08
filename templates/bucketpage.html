@@ -13,16 +13,20 @@
         <input type="text" name="query" value="{{ prevsearch }}">
         <input type="submit" name="querybutton" value="Send">
     </form>
-    <ul id="result">
-        {% for ent in bucket %}
-            <a href="#">
-                <li class="result-item">
-                    <h3>{{ ent.name }}</h3>
-                    <img src="/static/{{ ent.path }}" alt="image for {{ ent.name }}">
-                </li>
-            </a>
-        {% endfor %}
-    </ul>
+    {% if empty %}
+        <div id="emptymessage">No results found</div>
+    {% else %}
+        <ul id="result">
+            {% for ent in bucket %}
+                <a href="#">
+                    <li class="result-item">
+                        <h3>{{ ent.name }}</h3>
+                        <img src="/static/{{ ent.path }}" alt="image for {{ ent.name }}">
+                    </li>
+                </a>
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}
 {% block footer %}
     {{ super() }}
