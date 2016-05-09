@@ -2,10 +2,13 @@
 import functools as f
 import pickle
 import yaml
+import hashlib
 
 AND = 0
 OR = 1
 NOT = 2
+
+BLOCKSIZE = 65536 # used for hashing binaries
 
 # EAV
 class Entity(object):
@@ -50,14 +53,15 @@ class Tag(object):
 
 class Bucket(dict):
     """ Set of entities """
-    def __init__(self, name, coherence=None, inference=None):
+    def __init__(self, path, name=False, coherence=None, inference=None):
         super().__init__()
-        self.name = name
+        self.path = path
+        self.name = name or path
         self.coherence = coherence
         self.inference = inference
 
     def __str__(self):
-        return self.name + ' <{\n' + ';\n'.join(str(ent) for ent in self) + '\n}>'
+        return self.name + ' <{\n' + ';\n'.join(str(self[key].name) for key in self) + '\n}>'
     
     def querytag(self, tag):
         """ Search for all Entities: tag in self """
@@ -101,8 +105,8 @@ class Bucket(dict):
         else:
             raise QueryError(query)
 
-    def dump(self, path):
-        with open(path, 'wb') as outfile:
+    def dump(self):
+        with open(self.path, 'wb') as outfile:
             pickle.dump(self, outfile)
 
 def loadbucket(path):
@@ -124,6 +128,15 @@ def parsequery(querystring):
             ands.append(Tag(word))
     return (AND, ands)
 
+def hashfile(path):
+    """ Returns a string of hexes """
+    with open(path, 'rb') as infile:
+        hasher = hashlib.sha1()
+        buf = infile.read(BLOCKSIZE)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = infile.read(BLOCKSIZE)
+    return hasher.hexdigest()
 
 # EXCEPTIONS
 class TagAddError(Exception):
@@ -196,22 +209,9 @@ def main():
             )
 
     goodkeys = b.query(query)
-    c = Bucket('results')
+    c = Bucket('Results')
     c.update((key, b[key]) for key in goodkeys)
     print(c)
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-

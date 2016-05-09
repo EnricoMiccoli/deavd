@@ -44,10 +44,17 @@ def bucketquery(bucketname=None):
         else: 
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
-@app.route('/b/<bucketname>/<entname>')
-def entpage(bucketname=None, entname=None):
-    entity = Entity('Test', 'test')
-    return render_template('entitypage.html', ent=entity)
+@app.route('/b/<bucketname>/<entkey>')
+def entpage(bucketname=None, entkey=None):
+    try:
+        bucket = loadbucket(bucketname)
+    except FileNotFoundError:
+        return render_template('nobucketfound.html', bucketname=bucketname)
+    try:
+        entity = bucket[entkey]
+    except KeyError:
+        return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname) 
+    return render_template('entitypage.html', bucketname=bucket.name, ent=entity)
 
 if __name__ == '__main__':
     app.run()

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block head %}
+    <title>Entity not Found!</title>
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+    <h1>Entity not found!</h1>
+    <p>Entity <code>{{ entityname }}</code> was not found in the <code>{{ bucketname }}</code> bucket.</p>
+    {{ super() }}
+{% endblock %}}

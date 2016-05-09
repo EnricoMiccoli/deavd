@@ -17,7 +17,7 @@
     {% else %}
         <ul id="result">
             {% for key in bucket %}
-                <a href="#">
+            <a href="/b/{{ bucket.path }}/{{ key }}">
                     <li class="result-item">
                         <h3>{{ bucket[key].name }}</h3>
                         <img src="/static/{{ bucket[key].path }}" alt="image for {{ bucket[key].name }}">
