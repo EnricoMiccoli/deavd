@@ -7,6 +7,17 @@
 
 {% block body %}
     <h1 id="titlebar">{{ bucketname }}: {{ ent.name }}</h1>
+    <div id="image-wrapper">
+        <img id="image" src="/static/{{ ent.path }}" alt="Image for {{ ent.name }}">
+    </div>
+    <div id="side">
+        <p>{{ ent.name }} is tagged with:</p>
+        <ul>
+            {% for tag in ent.tags %}
+                <li>{{ tag }}</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
 
 {% block footer %}

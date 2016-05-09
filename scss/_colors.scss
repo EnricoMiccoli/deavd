@@ -9,3 +9,11 @@ $main700: #689f38;
 $main300: #aed581;
 $accent400: #ffc400;
 $accent200: #ffd740;
+
+@mixin tile($pixels){
+    display: block;
+    background: $white;
+    border: thin solid $divider;
+    border-radius: 2px;
+    box-shadow: 0px $pixels $pixels $divider;
+}
