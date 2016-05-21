@@ -8,7 +8,8 @@ body {
     margin-right: 12%;
 }
 a{
-    color: $accent400;
+    color: $accent700;
+    text-decoration: none;
 }
 code{
     background-color: $accent200;
@@ -16,6 +17,7 @@ code{
 }
 #footer{
     clear: both;
+    margin-top: 20px;
     padding: 15px;
     text-align: center;
     border-top: thin solid $divider;
