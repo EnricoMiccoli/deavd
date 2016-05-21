@@ -8,6 +8,8 @@ app = Flask(__name__)
 app.debug = True
 Scss(app, asset_dir='./')
 
+BUCKETDIR = 'buckets/'
+
 @app.route('/')
 def homepage():
     return render_template('homepage.html', buckets=['shapes'])
@@ -15,7 +17,7 @@ def homepage():
 @app.route('/b/<bucketname>')
 def bucketpage(bucketname=None):
     try:
-        bucket = loadbucket(bucketname)
+        bucket = loadbucket(BUCKETDIR + bucketname)
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
     return render_template('bucketpage.html', bucket=bucket)
