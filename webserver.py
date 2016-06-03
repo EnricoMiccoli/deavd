@@ -1,14 +1,36 @@
-from flask import Flask
-from flask import request
-from flask import render_template
-from flask.ext.scss import Scss
+import os
 from deavd import * # necessary to properly unpickle
+import owncrypto as oc
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import session
+from flask.ext.scss import Scss
 
 app = Flask(__name__)
 app.debug = True
+app.secret_key = os.urandom(512)
+
 Scss(app, asset_dir='./')
 
 BUCKETDIR = 'buckets/'
+
+@app.route('/test')
+def testpage():
+    try:
+        return session['username']
+    except KeyError:
+        return "You aren't logged in"
+
+@app.route('/login/<user>/')
+def login(user=None, var=None):
+    session['username'] = user
+    return "logged in"
+
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return 'You have logged out'
 
 @app.route('/')
 def homepage():
