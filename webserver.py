@@ -25,7 +25,7 @@ def bucketpage(bucketname=None):
 @app.route('/b/<bucketname>', methods=['POST'])
 def bucketquery(bucketname=None):
     try:
-        bucket = loadbucket(bucketname)
+        bucket = loadbucket(BUCKETDIR + bucketname)
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
 
@@ -49,7 +49,7 @@ def bucketquery(bucketname=None):
 @app.route('/b/<bucketname>/<entkey>')
 def entpage(bucketname=None, entkey=None):
     try:
-        bucket = loadbucket(bucketname)
+        bucket = loadbucket(BUCKETDIR + bucketname)
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
     try:
