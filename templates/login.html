@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block head %}
+    <title>{{ Login }}</title>
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+    <h1 id="titlebar">Login</h1>
+    <form method="POST" id="login">
+        Username<br/>
+        <input type="text" name="username" value="">
+        <br/>
+        Password<br/>
+        <input type="text" name="password" value="">
+        <br/>
+        <input type="submit" name="querybutton" value="LOGIN" id="loginbtn">
+    </form>
+{% endblock %}
+{% block footer %}
+    {{ super() }}
+{% endblock %}

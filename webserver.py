@@ -1,4 +1,5 @@
 import os
+import time
 from deavd import * # necessary to properly unpickle
 import owncrypto as oc
 from flask import Flask
@@ -6,6 +7,7 @@ from flask import render_template
 from flask import request
 from flask import session
 from flask.ext.scss import Scss
+
 
 app = Flask(__name__)
 app.debug = True
@@ -15,22 +17,45 @@ Scss(app, asset_dir='./')
 
 BUCKETDIR = 'buckets/'
 
+# {id: {key: value}} 
+mastersession = {}
+passdb = {'user': oc.storepassword('pass')}
+
+def assignid():
+    """ Mind the side effects! """
+    sessionid = os.urandom(512)
+    mastersession[sessionid] = {
+            'username': '',
+            'authenticated': 0,
+            'timestamp': time.monotonic(),
+        }
+    session['sessionid'] = sessionid
+    return sessionid
+
 @app.route('/test')
 def testpage():
     try:
-        return session['username']
+        return 'You are ' +  mastersession[session['sessionid']]['username'] + ' and you are ' + 'not ' * int(not mastersession[session['sessionid']]['authenticated']) + 'authenticated'
     except KeyError:
-        return "You aren't logged in"
+        return "Who the hell are you"
 
-@app.route('/login/<user>/')
-def login(user=None, var=None):
-    session['username'] = user
-    return "logged in"
+@app.route('/login', methods=['POST'])
+def login():
+    sessionid = assignid()
+    password = request.form['password']
+    username = request.form['username']
+    try:
+        if oc.authenticate(password, passdb[username]):
+            mastersession[sessionid]['username'] = username
+            mastersession[sessionid]['authenticated'] = 1
+            return "You have logged in"
+    except KeyError:
+        pass
+    return "Invalid credentials"
 
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    return 'You have logged out'
+@app.route('/login')
+def loginpage():
+    return render_template('login.html')
 
 @app.route('/')
 def homepage():
