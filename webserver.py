@@ -1,13 +1,11 @@
 import os
 import time
 from deavd import * # necessary to properly unpickle
+import functools as f
 import owncrypto as oc
 from flask import Flask
-from flask import render_template
-from flask import request
-from flask import session
 from flask.ext.scss import Scss
-
+from flask import render_template, redirect, url_for, request, session
 
 app = Flask(__name__)
 app.debug = True
@@ -20,6 +18,7 @@ BUCKETDIR = 'buckets/'
 # {id: {key: value}} 
 mastersession = {}
 passdb = {'user': oc.storepassword('pass')}
+clearancedb = {'user': set(['theta'])}
 
 def assignid():
     """ Mind the side effects! """
@@ -29,13 +28,42 @@ def assignid():
             'authenticated': 0,
             'timestamp': time.monotonic(),
         }
-    session['sessionid'] = sessionid
+    session['id'] = sessionid
     return sessionid
+
+def server_session():
+    return mastersession[session['id']]
+
+def require_clearance(level):
+    def req(pageview):
+        @f.wraps(pageview)
+        def wrapper(*args, **kwargs):
+            try:
+                if server_session()['authenticated']:
+                    if level in clearancedb[server_session()['username']]:
+                        return pageview(*args, **kwargs)
+                    else:
+                        return render_template('message.html', title='Access Denied', message="You don't have the proper clearance to access this information."), 403
+            except KeyError:
+                pass
+            return redirect(url_for('login'), code=302)
+        return wrapper
+    return req
+
+@app.route('/theta')
+@require_clearance('theta')
+def theta():
+    return 'this is theta secret'
+
+@app.route('/delta')
+@require_clearance('delta')
+def delta():
+    return 'this is a delta secret'
 
 @app.route('/test')
 def testpage():
     try:
-        return 'You are ' +  mastersession[session['sessionid']]['username'] + ' and you are ' + 'not ' * int(not mastersession[session['sessionid']]['authenticated']) + 'authenticated'
+        return render_template('message.html', title='Credential Check', message='You are ' +  mastersession[session['id']]['username'] + ' and you are ' + 'not ' * int(not mastersession[session['id']]['authenticated']) + 'authenticated with ' + ', '.join([x for x in clearancedb[server_session()['username']]]))
     except KeyError:
         return "Who the hell are you"
 
@@ -48,10 +76,10 @@ def login():
         if oc.authenticate(password, passdb[username]):
             mastersession[sessionid]['username'] = username
             mastersession[sessionid]['authenticated'] = 1
-            return "You have logged in"
+            return render_template('message.html', title="You have logged in")
     except KeyError:
         pass
-    return "Invalid credentials"
+    return render_template('message.html', title="Invalid credentials")
 
 @app.route('/login')
 def loginpage():
