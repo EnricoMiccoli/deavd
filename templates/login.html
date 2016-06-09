@@ -6,7 +6,8 @@
 
 {% block body %}
     <h1 id="titlebar">Login</h1>
-    <form method="POST" id="login">
+    <p>To access this resources you must authenticate.</p>
+    <form method="POST" action="/login" id="login">
         Username<br/>
         <input type="text" name="username" value="">
         <br/>
@@ -14,6 +15,7 @@
         <input type="password" name="password" value="">
         <br/>
         <input type="submit" name="querybutton" value="LOGIN" id="loginbtn">
+        <input type="hidden" name="referrer" value="{{ referrer }}">
     </form>
 {% endblock %}
 {% block footer %}

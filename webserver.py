@@ -46,7 +46,7 @@ def require_clearance(level):
                         return render_template('message.html', title='Access Denied', message="You don't have the proper clearance to access this information."), 403
             except KeyError:
                 pass
-            return redirect(url_for('login'), code=302)
+            return render_template('login.html', referrer=url_for(pageview.__name__)), 401
         return wrapper
     return req
 
@@ -68,7 +68,7 @@ def testpage():
         return "Who the hell are you"
 
 @app.route('/login', methods=['POST'])
-def login():
+def login(referrer=None):
     sessionid = assignid()
     password = request.form['password']
     username = request.form['username']
@@ -76,7 +76,7 @@ def login():
         if oc.authenticate(password, passdb[username]):
             mastersession[sessionid]['username'] = username
             mastersession[sessionid]['authenticated'] = 1
-            return render_template('message.html', title="You have logged in")
+            return redirect(request.form['referrer'], 302)
     except KeyError:
         pass
     return render_template('message.html', title="Invalid credentials")
@@ -84,6 +84,11 @@ def login():
 @app.route('/login')
 def loginpage():
     return render_template('login.html')
+
+@app.route('/logout')
+def logoutpage():
+    mastersession.pop(session['id'])
+    return render_template('message.html', title="Logged out", message="You have succesfully logged out")
 
 @app.route('/')
 def homepage():
