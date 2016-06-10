@@ -98,9 +98,10 @@ def homepage():
 def bucketpage(bucketname=None):
     try:
         bucket = loadbucket(BUCKETDIR + bucketname)
+        fbp = bucket.path # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
-    return render_template('bucketpage.html', bucket=bucket)
+    return render_template('bucketpage.html', bucket=bucket, fbp=fbp)
 
 @app.route('/b/<bucketname>', methods=['POST'])
 def bucketquery(bucketname=None):
