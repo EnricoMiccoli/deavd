@@ -10,6 +10,9 @@ body {
 a{
     color: $accent700;
     text-decoration: none;
+    &:hover{
+        color: $accent400;
+    }
 }
 code{
     background-color: $accent200;
