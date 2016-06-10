@@ -106,12 +106,13 @@ def bucketpage(bucketname=None):
 def bucketquery(bucketname=None):
     try:
         bucket = loadbucket(BUCKETDIR + bucketname)
+        fbp = bucket.path # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
 
     stringquery = request.form['query']
     if not stringquery: # checks for empty query
-        return render_template('bucketpage.html', bucket=bucket, prevsearch='')
+        return render_template('bucketpage.html', bucket=bucket, prevsearch='', fbp=fbp)
     else:
         query = parsequery(stringquery)
         result = Bucket('Results of your query')
@@ -122,7 +123,7 @@ def bucketquery(bucketname=None):
 
         # check if empty
         if result:
-            return render_template('bucketpage.html', bucket=result, prevsearch=stringquery)
+            return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, fbp=fbp)
         else: 
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
