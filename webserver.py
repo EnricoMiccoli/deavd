@@ -138,5 +138,9 @@ def entpage(bucketname=None, entkey=None):
         return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname) 
     return render_template('entitypage.html', bucketname=bucket.name, ent=entity)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('message.html', title="Page not found", message="The resource you requested is not present on the server.", link=[url_for('homepage'), "Go back home"]), 404
+
 if __name__ == '__main__':
     app.run()
