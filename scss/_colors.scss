@@ -15,6 +15,7 @@ $accent200: #ffd740;
     display: block;
     background: $white;
     border: thin solid $divider;
-    border-radius: 2px;
+    border-radius: 3px;
     box-shadow: 0px $pixels $pixels $divider;
+    padding: 5px;
 }

@@ -1,32 +1,18 @@
 @import 'colors';
 #image{
-    width: auto;
     display: block;
+    width: inherit;
     margin: auto;
-    padding: 50px;
 }
 #image-wrapper{
-    width: 50%;
-    display: block;
-    margin: auto;
-    margin-bottom: 30px;
     @include tile(8px);
+    width: 90%;
+    margin: 15px auto;
+    padding: 10px;
 }
 #side{
     @include tile(3px);
-    width: 200px;
-    position: absolute;
-    top: 110px;
-    p{
-        padding: 0px;
-        margin-top: 5px;
-        margin-bottom: 0px;
-        margin-left: 15px;
-    }
     ul{
         list-style-type: none; 
-        padding: 0px;
-        margin-top: 0.5em;
-        margin-left: 25px;
     }
 }
