@@ -6,6 +6,7 @@
 }
 #image-wrapper{
     @include tile(8px);
+    max-width: 650px;
     width: 90%;
     margin: 15px auto;
     padding: 10px;
