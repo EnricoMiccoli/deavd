@@ -1,5 +1,5 @@
 # Templates
-Stored in `deavd/templates`. They are used to build the web pages. Refer to the `flask` and `Jinja2` docs for more details.
+Stored in `sitefiles/templates`. They are used to build the web pages. Refer to the `flask` and `Jinja2` docs for more details.
 
 Below are listed all the available templates with their arguments. Args between parens are optional.
 

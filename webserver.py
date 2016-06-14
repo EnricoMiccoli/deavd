@@ -1,19 +1,22 @@
 import os
 import time
-from deavd import * # necessary to properly unpickle
 import functools as f
-import owncrypto as oc
+from modules.deavd import * # necessary to properly unpickle
+import modules.owncrypto as oc
 from flask import Flask
 from flask.ext.scss import Scss
 from flask import render_template, redirect, url_for, request, session
 
-app = Flask(__name__)
+app = Flask(__name__,
+        static_folder='sitefiles/static',
+        template_folder='sitefiles/templates',
+        )
 app.debug = True
 app.secret_key = os.urandom(512)
 
-Scss(app, asset_dir='./')
+Scss(app, asset_dir='sitefiles/')
 
-BUCKETDIR = 'buckets/'
+BUCKETDIR = 'sitefiles/buckets/'
 
 # {id: {key: value}} 
 mastersession = {}

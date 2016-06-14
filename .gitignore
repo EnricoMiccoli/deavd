@@ -1,5 +1,5 @@
 *.*.swp
 __pycache__/
-static/*.css
-static/*.static
+sitefiles/static/*.css
+sitefiles/static/*.static
 
