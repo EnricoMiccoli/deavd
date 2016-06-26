@@ -8,7 +8,7 @@
 {% block body %}
     <h1 id="titlebar">{{ bucketname }}: {{ ent.name }}</h1>
     <div id="image-wrapper">
-        <img id="image" src="/static/{{ ent.path }}" alt="Image for {{ ent.name }}">
+        <img id="image" src="/blobs/{{ fbp }}/{{ ent.path }}" alt="Image for {{ ent.name }}">
     </div>
     <div id="side">
         <p>Tags:</p>

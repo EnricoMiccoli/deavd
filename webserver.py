@@ -1,11 +1,12 @@
 import os
+import shutil
 import time
 import functools as f
-from modules.deavd import * # necessary to properly unpickle
+import modules.deavd as deavd
 import modules.owncrypto as oc
 from flask import Flask
 from flask.ext.scss import Scss
-from flask import render_template, redirect, url_for, request, session
+from flask import render_template, redirect, url_for, request, session, send_from_directory, send_file
 
 app = Flask(__name__,
         static_folder='sitefiles/static',
@@ -17,6 +18,8 @@ app.secret_key = os.urandom(512)
 Scss(app, asset_dir='sitefiles/')
 
 BUCKETDIR = 'sitefiles/buckets/'
+def loadbucket(bucketname):
+    return deavd.loadbucket('%s%s/%s.bk' % (BUCKETDIR, bucketname, bucketname))
 
 # {id: {key: value}} 
 mastersession = {}
@@ -100,8 +103,8 @@ def homepage():
 @app.route('/b/<bucketname>')
 def bucketpage(bucketname=None):
     try:
-        bucket = loadbucket(BUCKETDIR + bucketname)
-        fbp = bucket.path # Father bucket path
+        bucket = loadbucket(bucketname)
+        fbp = os.path.splitext(bucket.path)[0] # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
     return render_template('bucketpage.html', bucket=bucket, fbp=fbp)
@@ -109,8 +112,8 @@ def bucketpage(bucketname=None):
 @app.route('/b/<bucketname>', methods=['POST'])
 def bucketquery(bucketname=None):
     try:
-        bucket = loadbucket(BUCKETDIR + bucketname)
-        fbp = bucket.path # Father bucket path
+        bucket = loadbucket(bucketname)
+        fbp = os.path.splitext(bucket.path)[0] # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
 
@@ -118,8 +121,8 @@ def bucketquery(bucketname=None):
     if not stringquery: # checks for empty query
         return render_template('bucketpage.html', bucket=bucket, prevsearch='', fbp=fbp)
     else:
-        query = parsequery(stringquery)
-        result = Bucket('Results of your query')
+        query = deavd.parsequery(stringquery)
+        result = deavd.Bucket('Results of your query')
         try:
             result.update((key, bucket[key]) for key in bucket.query(query))
         except QueryError:
@@ -134,18 +137,22 @@ def bucketquery(bucketname=None):
 @app.route('/b/<bucketname>/<entkey>')
 def entpage(bucketname=None, entkey=None):
     try:
-        bucket = loadbucket(BUCKETDIR + bucketname)
+        bucket = loadbucket(bucketname)
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
     try:
         entity = bucket[entkey]
     except KeyError:
         return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname) 
-    return render_template('entitypage.html', bucketname=bucket.name, ent=entity)
+    return render_template('entitypage.html', bucketname=bucket.name, fbp=bucketname, ent=entity)
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('message.html', title="Page not found", message="The resource you requested is not present on the server.", link=[url_for('homepage'), "Go back home"]), 404
+
+@app.route('/blobs/<bucketname>/<imagename>')
+def serve_image(bucketname=None, imagename=None):
+    return send_file('sitefiles/buckets/%s/%s' % (bucketname, imagename), as_attachment=False)
 
 if __name__ == '__main__':
     app.run()

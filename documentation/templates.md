@@ -20,6 +20,7 @@ Below are listed all the available templates with their arguments. Args between 
 
 * `ent` Entity object as defined in deavd.py
 * `bucketname` name of the bucket the ent belongs to
+* `fbp`
 
 ## homepage
 > Homepage of the website. Index of all available buckets.

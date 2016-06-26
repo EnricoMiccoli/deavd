@@ -1,8 +1,6 @@
 import os
 import hashlib
 
-SALT_LENGTH = 64
-
 def saltedhash(passwd, salt):
     assert isinstance(passwd, str)
     hasher = hashlib.sha512()

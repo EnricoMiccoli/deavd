@@ -20,7 +20,7 @@
             <a href="/b/{{ fbp }}/{{ key }}">
                     <li class="result-item">
                         <h3>{{ bucket[key].name }}</h3>
-                        <img src="/static/{{ bucket[key].path }}" alt="image for {{ bucket[key].name }}">
+                        <img src="/blobs/{{ fbp }}/{{ bucket[key].path }}" alt="image for {{ bucket[key].name }}">
                     </li>
                 </a>
             {% endfor %}
