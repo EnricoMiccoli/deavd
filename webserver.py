@@ -21,6 +21,8 @@ BUCKETDIR = 'sitefiles/buckets/'
 def loadbucket(bucketname):
     return deavd.loadbucket('%s%s/%s.bk' % (BUCKETDIR, bucketname, bucketname))
 
+BUCKET_CLEARANCES = {'shapes': [], 'restricted': 'omega'}
+
 @app.route('/theta')
 @cl.require_clearance('theta')
 def theta():
@@ -70,10 +72,19 @@ def logoutpage():
 
 @app.route('/')
 def homepage():
-    return render_template('homepage.html', buckets=['shapes'])
+    bucketnames = os.listdir('sitefiles/buckets')
+    return render_template('homepage.html', buckets=bucketnames)
 
 @app.route('/b/<bucketname>')
 def bucketpage(bucketname=None):
+    try:
+        clearance = BUCKET_CLEARANCES[bucketname]
+    except KeyError:
+        pass
+    if clearance:
+        check = cl.check_clearance(clearance, '/b/%s' % bucketname)
+        if check:
+            return check
     try:
         bucket = loadbucket(bucketname)
         fbp = os.path.splitext(bucket.path)[0] # Father bucket path

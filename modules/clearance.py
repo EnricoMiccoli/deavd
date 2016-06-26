@@ -6,7 +6,7 @@ from flask import redirect, session, render_template, url_for
 
 mastersession = {} # {id: {key: value}} 
 #TODO: pickle the userdb
-userdb = {'john': {'password': oc.storepassword('pass'), 'clearances': ['theta']}}
+userdb = {'john': {'password': oc.storepassword('pass'), 'clearances': ['theta', 'omega']}}
 
 def assignid():
     """ Mind the side effects! """
@@ -31,9 +31,22 @@ def require_clearance(clearance):
                     if clearance in userdb[user()['username']]['clearances']:
                         return pageview(*args, **kwargs)
                     else:
-                        return render_template('message.html', title='Access Denied', message="You don't have the proper clearance to access this information."), 403
+                        return render_template('message.html', title='Access Denied', message="You don't have the proper clearance to perform this action."), 403
             except KeyError:
                 pass
             return render_template('login.html', referrer=url_for(pageview.__name__)), 401
         return wrapper
     return req
+
+def check_clearance(clearance, referrer):
+    try:
+        if user()['authenticated']:
+            if clearance in userdb[user()['username']]['clearances']:
+                return False
+            else:
+                return render_template('message.html',
+                        title='Access Denied',
+                        message="You don't have the proper clearance to perform this action."), 403
+    except KeyError:
+        pass
+    return render_template('login.html', referrer=referrer), 401
