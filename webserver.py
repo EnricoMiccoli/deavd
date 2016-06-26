@@ -1,12 +1,12 @@
 import os
 import shutil
 import time
-import functools as f
 import modules.deavd as deavd
 import modules.owncrypto as oc
+import modules.clearance as cl
 from flask import Flask
 from flask.ext.scss import Scss
-from flask import render_template, redirect, url_for, request, session, send_from_directory, send_file
+from flask import render_template, redirect, url_for, request, send_file
 
 app = Flask(__name__,
         static_folder='sitefiles/static',
@@ -21,79 +21,51 @@ BUCKETDIR = 'sitefiles/buckets/'
 def loadbucket(bucketname):
     return deavd.loadbucket('%s%s/%s.bk' % (BUCKETDIR, bucketname, bucketname))
 
-# {id: {key: value}} 
-mastersession = {}
-passdb = {'user': oc.storepassword('pass')}
-clearancedb = {'user': set(['theta'])}
-
-def assignid():
-    """ Mind the side effects! """
-    sessionid = os.urandom(512)
-    mastersession[sessionid] = {
-            'username': '',
-            'authenticated': 0,
-            'timestamp': time.monotonic(),
-        }
-    session['id'] = sessionid
-    return sessionid
-
-def server_session():
-    return mastersession[session['id']]
-
-def require_clearance(level):
-    def req(pageview):
-        @f.wraps(pageview)
-        def wrapper(*args, **kwargs):
-            try:
-                if server_session()['authenticated']:
-                    if level in clearancedb[server_session()['username']]:
-                        return pageview(*args, **kwargs)
-                    else:
-                        return render_template('message.html', title='Access Denied', message="You don't have the proper clearance to access this information."), 403
-            except KeyError:
-                pass
-            return render_template('login.html', referrer=url_for(pageview.__name__)), 401
-        return wrapper
-    return req
-
 @app.route('/theta')
-@require_clearance('theta')
+@cl.require_clearance('theta')
 def theta():
     return 'this is theta secret'
 
 @app.route('/delta')
-@require_clearance('delta')
+@cl.require_clearance('delta')
 def delta():
     return 'this is a delta secret'
 
 @app.route('/test')
 def testpage():
     try:
-        return render_template('message.html', title='Credential Check', message='You are ' +  mastersession[session['id']]['username'] + ' and you are ' + 'not ' * int(not mastersession[session['id']]['authenticated']) + 'authenticated with ' + ', '.join([x for x in clearancedb[server_session()['username']]]))
+        return render_template('message.html', title='Credential Check', message='You are ' +
+                cl.user()['username'] +
+                ' and you are ' +
+                'not ' * int(not cl.user()['authenticated']) +
+                'authenticated ' +
+                'with ' * int(cl.user()['authenticated']) +
+                ', '.join([x for x in cl.userdb[cl.user()['username']]['clearances']])
+                )
     except KeyError:
         return "Who the hell are you"
-
-@app.route('/login', methods=['POST'])
-def login(referrer=None):
-    sessionid = assignid()
-    password = request.form['password']
-    username = request.form['username']
-    try:
-        if oc.authenticate(password, passdb[username]):
-            mastersession[sessionid]['username'] = username
-            mastersession[sessionid]['authenticated'] = 1
-            return redirect(request.form['referrer'], 302)
-    except KeyError:
-        pass
-    return render_template('message.html', title="Invalid credentials")
 
 @app.route('/login')
 def loginpage():
     return render_template('login.html')
 
+@app.route('/login', methods=['POST'])
+def login(referrer=None):
+    sessionid = cl.assignid()
+    password = request.form['password']
+    username = request.form['username']
+    try:
+        if oc.authenticate(password, cl.userdb[username]['password']):
+            cl.user()['username'] = username
+            cl.user()['authenticated'] = 1
+            return redirect(request.form['referrer'], 302)
+    except KeyError:
+        pass
+    return render_template('message.html', title="Invalid credentials")
+
 @app.route('/logout')
 def logoutpage():
-    mastersession.pop(session['id'])
+    cl.mastersession.pop(session['id'])
     return render_template('message.html', title="Logged out", message="You have succesfully logged out")
 
 @app.route('/')
