@@ -5,7 +5,7 @@ import modules.deavd as deavd
 import modules.owncrypto as oc
 import modules.clearance as cl
 from flask import Flask
-from flask.ext.scss import Scss
+from flask_scss import Scss
 from flask import render_template, redirect, url_for, request, send_file, abort
 
 app = Flask(__name__,
