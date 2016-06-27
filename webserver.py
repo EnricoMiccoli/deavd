@@ -6,7 +6,7 @@ import modules.owncrypto as oc
 import modules.clearance as cl
 from flask import Flask
 from flask.ext.scss import Scss
-from flask import render_template, redirect, url_for, request, send_file
+from flask import render_template, redirect, url_for, request, send_file, abort
 
 app = Flask(__name__,
         static_folder='sitefiles/static',
@@ -21,7 +21,7 @@ BUCKETDIR = 'sitefiles/buckets/'
 def loadbucket(bucketname):
     return deavd.loadbucket('%s%s/%s.bk' % (BUCKETDIR, bucketname, bucketname))
 
-BUCKET_CLEARANCES = {'shapes': [], 'restricted': 'omega'}
+BUCKET_CLEARANCES = {'shapes': '', 'restricted': 'omega'}
 
 @app.route('/theta')
 @cl.require_clearance('theta')
@@ -45,7 +45,9 @@ def testpage():
                 ', '.join([x for x in cl.userdb[cl.user()['username']]['clearances']])
                 )
     except KeyError:
-        return "Who the hell are you"
+        return render_template('message.html',
+                title='Not logged in',
+                message='You are not logged in on this server.')
 
 @app.route('/login')
 def loginpage():
@@ -76,15 +78,8 @@ def homepage():
     return render_template('homepage.html', buckets=bucketnames)
 
 @app.route('/b/<bucketname>')
+@cl.bucket_clearance(BUCKET_CLEARANCES)
 def bucketpage(bucketname=None):
-    try:
-        clearance = BUCKET_CLEARANCES[bucketname]
-    except KeyError:
-        pass
-    if clearance:
-        check = cl.check_clearance(clearance, '/b/%s' % bucketname)
-        if check:
-            return check
     try:
         bucket = loadbucket(bucketname)
         fbp = os.path.splitext(bucket.path)[0] # Father bucket path
@@ -93,6 +88,7 @@ def bucketpage(bucketname=None):
     return render_template('bucketpage.html', bucket=bucket, fbp=fbp)
 
 @app.route('/b/<bucketname>', methods=['POST'])
+@cl.bucket_clearance(BUCKET_CLEARANCES)
 def bucketquery(bucketname=None):
     try:
         bucket = loadbucket(bucketname)
@@ -118,6 +114,7 @@ def bucketquery(bucketname=None):
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
 @app.route('/b/<bucketname>/<entkey>')
+@cl.bucket_clearance(BUCKET_CLEARANCES)
 def entpage(bucketname=None, entkey=None):
     try:
         bucket = loadbucket(bucketname)
@@ -129,13 +126,17 @@ def entpage(bucketname=None, entkey=None):
         return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname) 
     return render_template('entitypage.html', bucketname=bucket.name, fbp=bucketname, ent=entity)
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('message.html', title="Page not found", message="The resource you requested is not present on the server.", link=[url_for('homepage'), "Go back home"]), 404
-
 @app.route('/blobs/<bucketname>/<imagename>')
+@cl.bucket_clearance(BUCKET_CLEARANCES)
 def serve_image(bucketname=None, imagename=None):
     return send_file('sitefiles/buckets/%s/%s' % (bucketname, imagename), as_attachment=False)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('message.html',
+            title="Page not found",
+            message="The resource you requested is not present on the server.",
+            link=[url_for('homepage'), "Go back home"]), 404
 
 if __name__ == '__main__':
     app.run()
