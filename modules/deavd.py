@@ -1,7 +1,6 @@
 # Deductive entity-attribute-value database
 import functools as f
 import pickle
-import yaml
 import hashlib
 
 AND = 0
