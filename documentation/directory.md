@@ -1,5 +1,5 @@
 # Directory structure
-Everything besides `documentation/` is necessary to deploy the app.
+Everything besides `documentation/`, `LICENSE`, and `README.md` is necessary to deploy the app.
 
 * `documentation/` docs for the project
 * `modules` extensions and modules imported by `webserver.py`
