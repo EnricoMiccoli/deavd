@@ -3,24 +3,22 @@ import time
 import modules.deavd as deavd
 import modules.owncrypto as oc
 import modules.clearance as cl
+from  modules.config import conf
 from flask import Flask
 from flask_scss import Scss
 from flask import render_template, redirect, url_for, request, send_file, abort
 
 app = Flask(__name__,
-        static_folder='sitefiles/static',
-        template_folder='sitefiles/templates',
+        static_folder=conf['staticdir'],
+        template_folder=conf['templatedir'],
         )
-app.debug = True
-app.secret_key = os.urandom(512)
+app.debug = conf['debug']
+app.secret_key = os.urandom(conf['secretlength'])
 
-Scss(app, asset_dir='sitefiles/')
+Scss(app, asset_dir=conf['scssdir'], static_dir=conf['staticdir'] + '/')
+# I'm not sure about that added slash, but it's necessary
 
-BUCKETDIR = 'sitefiles/buckets/'
-def loadbucket(bucketname):
-    return deavd.loadbucket('%s%s/%s.bk' % (BUCKETDIR, bucketname, bucketname))
-
-BUCKET_CLEARANCES = {'shapes': '', 'restricted': 'omega'}
+BUCKET_CLEARANCES = conf['bucketclear']
 
 @app.route('/theta')
 @cl.require_clearance('theta')
@@ -77,20 +75,20 @@ def homepage():
     return render_template('homepage.html', buckets=bucketnames)
 
 @app.route('/b/<bucketname>')
-@cl.bucket_clearance(BUCKET_CLEARANCES)
+@cl.bucket_clearance(BUCKET_CLEARANCES['read'])
 def bucketpage(bucketname=None):
     try:
-        bucket = loadbucket(bucketname)
+        bucket = deavd.loadbucket(bucketname)
         fbp = os.path.splitext(bucket.path)[0] # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
     return render_template('bucketpage.html', bucket=bucket, fbp=fbp)
 
 @app.route('/b/<bucketname>', methods=['POST'])
-@cl.bucket_clearance(BUCKET_CLEARANCES)
+@cl.bucket_clearance(BUCKET_CLEARANCES['read'])
 def bucketquery(bucketname=None):
     try:
-        bucket = loadbucket(bucketname)
+        bucket = deavd.loadbucket(bucketname)
         fbp = os.path.splitext(bucket.path)[0] # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
@@ -113,10 +111,10 @@ def bucketquery(bucketname=None):
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
 @app.route('/b/<bucketname>/<entkey>')
-@cl.bucket_clearance(BUCKET_CLEARANCES)
+@cl.bucket_clearance(BUCKET_CLEARANCES['read'])
 def entpage(bucketname=None, entkey=None):
     try:
-        bucket = loadbucket(bucketname)
+        bucket = deavd.loadbucket(bucketname)
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
     try:
@@ -125,8 +123,18 @@ def entpage(bucketname=None, entkey=None):
         return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname) 
     return render_template('entitypage.html', bucketname=bucket.name, fbp=bucketname, ent=entity)
 
+@app.route('/b/<bucketname>/<entkey>', methods=['POST'])
+@cl.bucket_clearance(BUCKET_CLEARANCES['write'])
+def addtag(bucketname=None, entkey=None):
+    try:
+        bucket = deavd.loadbucket(bucketname)
+        bucket[entkey].addtag(deavd.Tag(request.form['addtag']))
+    except (FileNotFoundError, KeyError):
+        abort(404) #TODO log this event
+    return redirect('/b/%s/%s' % (bucketname, entkey))
+
 @app.route('/blobs/<bucketname>/<imagename>')
-@cl.bucket_clearance(BUCKET_CLEARANCES)
+@cl.bucket_clearance(BUCKET_CLEARANCES['read'])
 def serve_image(bucketname=None, imagename=None):
     return send_file('sitefiles/buckets/%s/%s' % (bucketname, imagename), as_attachment=False)
 
@@ -138,4 +146,4 @@ def page_not_found(e):
             link=[url_for('homepage'), "Go back home"]), 404
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host=conf['host'], port=conf['port'])

@@ -1,0 +1,28 @@
+# Database
+fileblocksize: 65536 # use for hashing binaries
+
+# Directories
+bucketdir: sitefiles/buckets/
+scssdir: sitefiles/scss/
+staticdir: sitefiles/static
+templatedir: sitefiles/templates/
+
+# Clerances
+bucketclear:
+    read:
+        shapes: ''
+        restricted: omega
+    write:
+        shapes: omega
+        restricted: omega
+
+# Webserver   
+debug: True
+host: localhost
+port: 5000
+secretlength: 512 # length of the flask secret key (bytes)
+
+# Json output
+json:
+    indent: 4
+    sorted: True

@@ -17,6 +17,11 @@
                 <li>{{ tag }}</li>
             {% endfor %}
         </ul>
+        Add a tag:
+        <form method="POST" id="addtag" >
+            <input type="test" name="tagname" value="">
+            <input type="submit" name="submit" value="ADD" id="tagbtn" class="btn">
+        </form>
     </div>
 {% endblock %}
 

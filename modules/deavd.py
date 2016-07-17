@@ -1,13 +1,16 @@
 # Deductive entity-attribute-value database
 import functools as f
+from modules.config import conf
 import pickle
 import hashlib
+import json
 
 AND = 0
 OR = 1
 NOT = 2
 
-BLOCKSIZE = 65536 # used for hashing binaries
+BLOCKSIZE = conf['fileblocksize'] # used for hashing binaries
+PATH = conf['bucketdir']
 
 # EAV
 class Entity(object):
@@ -29,6 +32,15 @@ class Entity(object):
             raise TagBlacklistedException(newtag)
         else:
             self.tags.add(newtag)
+
+    def serial(self):
+        return {'name': self.name,
+                'path': self.path,
+                'tags': [x.name for x in self.tags],
+                }
+
+    def json(self):
+        return json.dumps(self.serial())
 
 class Tag(object):
     def __init__(self, name, attributes=None):
@@ -104,15 +116,35 @@ class Bucket(dict):
         else:
             raise QueryError(query)
 
-    def dump(self):
-        with open(self.path, 'wb') as outfile:
-            pickle.dump(self, outfile)
+    def serial(self):
+        ents = {}
+        ents.update([(x,self[x].serial()) for x in self]),
+        return {'path': self.path,
+                'name': self.name,
+                'ents': ents,
+                }
 
-def loadbucket(path):
-    with open(path, 'rb') as infile:
-        bucket =  pickle.load(infile)
-        assert isinstance(bucket, Bucket)
-        return bucket
+    def json(self):
+        return json.dumps(self.serial(), indent=conf['json']['indent']) 
+
+    def dump(self):
+        with open(PATH + self.path, 'w') as outfile:
+            outfile.write(self.json())
+
+def deserial_ent(serial):
+    return Entity(serial['name'], serial['path'], tags=[Tag(x) for x in serial['tags']])
+
+def deserial_bucket(serial):
+    bucket = Bucket(serial['path'], name=serial['name'])
+    ents = [deserial_ent(serial['ents'][x]) for x in serial['ents']]
+    bucket.update(zip(serial['ents'], ents))
+    return bucket
+
+def loadbucket(bucketname):
+    with open(PATH + '%s/%s.json' % (bucketname, bucketname), 'r') as infile:
+        infile = infile.read()
+        serial = json.loads(infile)
+    return deserial_bucket(serial)
 
 def parsequery(querystring):
     words = querystring.split()

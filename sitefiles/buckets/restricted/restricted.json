@@ -1,0 +1,78 @@
+{
+    "ents": {
+        "631a7939a463a22ab9555a967e4d1816488dab83": {
+            "tags": [
+                "red",
+                "star"
+            ],
+            "path": "redstar.png",
+            "name": "redstar"
+        },
+        "8b823ca4dddb443931ece4911b2f69527a741aca": {
+            "tags": [
+                "red",
+                "square"
+            ],
+            "path": "redsquare.png",
+            "name": "redsquare"
+        },
+        "054a9dd4c45faa3642fafcb0e69f7f4c82b61a6a": {
+            "tags": [
+                "blue",
+                "circle"
+            ],
+            "path": "bluecircle.png",
+            "name": "bluecircle"
+        },
+        "2e0a65ce7d0b6b94c6f3e39195701377d3d6f655": {
+            "tags": [
+                "circle",
+                "red"
+            ],
+            "path": "redcircle.png",
+            "name": "redcircle"
+        },
+        "397b6d0fb7c9afd303c534fc6d53fe31dfdf2adb": {
+            "tags": [
+                "star",
+                "green"
+            ],
+            "path": "greenstar.png",
+            "name": "greenstar"
+        },
+        "d63d30839e91725c0100fd7b9b50c0bb1efa3fc9": {
+            "tags": [
+                "blue",
+                "square"
+            ],
+            "path": "bluesquare.png",
+            "name": "bluesquare"
+        },
+        "1532a1a999551a4ddb75ce7e77f362fa210636f9": {
+            "tags": [
+                "green",
+                "square"
+            ],
+            "path": "greensquare.png",
+            "name": "greensquare"
+        },
+        "36425ce820ab5d7524f67878461729182286ad91": {
+            "tags": [
+                "green",
+                "circle"
+            ],
+            "path": "greencircle.png",
+            "name": "greencircle"
+        },
+        "1a05112689b5cf32fc4c063a75bc100e3c378999": {
+            "tags": [
+                "blue",
+                "star"
+            ],
+            "path": "bluestar.png",
+            "name": "bluestar"
+        }
+    },
+    "path": "restricted.json",
+    "name": "The Restricted Bucket"
+}
