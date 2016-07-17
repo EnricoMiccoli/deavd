@@ -7,6 +7,7 @@ from flask import redirect, session, render_template, url_for, abort
 mastersession = {} # {id: {key: value}} 
 #TODO: json the userdb
 userdb = {'john': {'password': oc.storepassword('pass'), 'clearances': ['theta', 'omega']}}
+dummy = oc.storepassword('correcthorsebatterystaple')
 
 def assignid():
     """ Mind the side effects! """

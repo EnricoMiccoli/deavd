@@ -61,7 +61,7 @@ def login(referrer=None):
             cl.user()['authenticated'] = 1
             return redirect(request.form['referrer'], 302)
     except KeyError:
-        pass
+        oc.authenticate(password, cl.dummy)
     return render_template('message.html', title="Invalid credentials")
 
 @app.route('/logout')
