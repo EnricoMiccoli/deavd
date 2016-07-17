@@ -21,6 +21,7 @@ debug: True
 host: localhost
 port: 5000
 secretlength: 512 # length of the flask secret key (bytes)
+bcryptfactor: 13
 
 # Json output
 json:

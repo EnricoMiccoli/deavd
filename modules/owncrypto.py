@@ -1,15 +1,10 @@
-import os
-import hashlib
+import bcrypt
+from modules.config import conf
 
-def saltedhash(passwd, salt):
-    assert isinstance(passwd, str)
-    hasher = hashlib.sha512()
-    hasher.update(passwd.encode('utf-8') + salt)
-    return hasher.hexdigest()
+def storepassword(inputstring):
+    passw = inputstring.encode('utf-8')
+    return bcrypt.hashpw(passw, bcrypt.gensalt(conf['bcryptfactor']))
 
-def storepassword(passw):
-    salt = os.urandom(512)
-    return saltedhash(passw, salt), salt
-
-def authenticate(inputstring, storedtuple):
-    return saltedhash(inputstring, storedtuple[1]) == storedtuple[0]
+def authenticate(inputstring, stored):
+    passw = inputstring.encode('utf-8')
+    return bcrypt.hashpw(passw, stored) == stored
