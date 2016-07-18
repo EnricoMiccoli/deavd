@@ -125,7 +125,7 @@ class Bucket(dict):
                 }
 
     def json(self):
-        return json.dumps(self.serial(), indent=conf['json']['indent']) 
+        return json.dumps(self.serial(), indent=conf['json']['indent'])
 
     def dump(self):
         with open(PATH + self.path, 'w') as outfile:
@@ -204,7 +204,7 @@ class BucketDuplicateException(Exception):
         self.ent = ent
 
     def __str__(self):
-        return "Duplicate binary " + self.ent.name + '; Cannot add!' 
+        return "Duplicate binary " + self.ent.name + '; Cannot add!'
 
 class QueryError(Exception):
     def __init__(self, query):

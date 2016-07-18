@@ -107,7 +107,7 @@ def bucketquery(bucketname=None):
         # check if empty
         if result:
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, fbp=fbp)
-        else: 
+        else:
             return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
 
 @app.route('/b/<bucketname>/<entkey>')
@@ -120,7 +120,7 @@ def entpage(bucketname=None, entkey=None):
     try:
         entity = bucket[entkey]
     except KeyError:
-        return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname) 
+        return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname)
     return render_template('entitypage.html', bucketname=bucket.name, fbp=bucketname, ent=entity)
 
 @app.route('/b/<bucketname>/<entkey>', methods=['POST'])

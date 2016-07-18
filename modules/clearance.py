@@ -4,7 +4,7 @@ import functools as f
 import modules.owncrypto as oc
 from flask import redirect, session, render_template, url_for, abort
 
-mastersession = {} # {id: {key: value}} 
+mastersession = {} # {id: {key: value}}
 #TODO: json the userdb
 userdb = {'john': {'password': oc.storepassword('pass'), 'clearances': ['theta', 'omega']}}
 dummy = oc.storepassword('correcthorsebatterystaple')
@@ -77,4 +77,3 @@ def bucket_clearance(clearances):
             return pageview(*args, **kwargs)
         return wrapper
     return checker
-

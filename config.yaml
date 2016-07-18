@@ -16,7 +16,7 @@ bucketclear:
         shapes: omega
         restricted: omega
 
-# Webserver   
+# Webserver
 debug: True
 host: localhost
 port: 5000
