@@ -8,3 +8,4 @@ Everything besides `documentation/`, `LICENSE`, and `README.md` is necessary to 
     * `scss` scss files and partials
     * `static` contains the compiled css
     * `templates/` Jinja2 templates. Refer to [`documentation/templates.md`](templates.md) for details 
+* `config.yaml` configuration file

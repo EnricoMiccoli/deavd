@@ -1,5 +1,3 @@
 # Bucket directory
-* `bucketname.bk`
+* `bucketname.json`
 * binary files
-* `coherence`
-* `inference`

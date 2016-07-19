@@ -28,9 +28,9 @@ Below are listed all the available templates with their arguments. Args between 
 * `buckets` list of the Bucket objects to be indexed.
 
 ## login
-> Prompts for username and password. Makes a post request, if the credentials given are correct the server-side var `mastersession['authenticated']` is set to True. Should only be used for debugging: the user will automatically be prompted for authentication when needed.
+> Prompts for username and password. Makes a post request, if the credentials given are correct the server-side var `cl.user()['authenticated']` is set to True. Should only be used for debugging: the user will automatically be prompted for authentication when needed.
 
-*No arguments*
+* `referrer` url the user will get redirected to after a succesful login
 
 ## message
 > Versatile template to inform the user. Should only be used for short messages, no more than one paragraph. Can display a title, a body, and a link. Used also to build error pages that offer a link back to the homepage.
