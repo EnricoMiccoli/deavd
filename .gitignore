@@ -1,3 +1,4 @@
 modules/__pycache__/
 sitefiles/static/*.css
 sitefiles/static/*.static
+deavdviewer.log

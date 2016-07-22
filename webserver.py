@@ -1,8 +1,10 @@
 import os
 import time
+import logging
 import modules.deavd as deavd
 import modules.owncrypto as oc
 import modules.clearance as cl
+import modules.log
 from  modules.config import conf
 from flask import Flask
 from flask_scss import Scss
@@ -59,6 +61,7 @@ def login(referrer=None):
         if oc.authenticate(password, cl.userdb[username]['password']):
             cl.user()['username'] = username
             cl.user()['authenticated'] = 1
+            logging.info('%s logged in as %s' % (request.environ['REMOTE_ADDR'], username))
             return redirect(request.form['referrer'], 302)
     except KeyError:
         oc.authenticate(password, cl.dummy)
@@ -146,4 +149,5 @@ def page_not_found(e):
             link=[url_for('homepage'), "Go back home"]), 404
 
 if __name__ == '__main__':
+    logging.debug('app starting')
     app.run(host=conf['host'], port=conf['port'])

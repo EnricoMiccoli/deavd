@@ -27,3 +27,7 @@ bcryptfactor: 13
 json:
     indent: 4
     sorted: True
+
+# Logging
+logfile: deavdviewer.log
+loglevel: debug
