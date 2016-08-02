@@ -128,7 +128,7 @@ class Bucket(dict):
         return json.dumps(self.serial(), indent=conf['json']['indent'])
 
     def dump(self):
-        with open(PATH + self.path, 'w') as outfile:
+        with open(PATH + self.path.split('.')[0] + '/' + self.path, 'w') as outfile:
             outfile.write(self.json())
 
 def deserial_ent(serial):

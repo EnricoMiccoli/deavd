@@ -73,6 +73,6 @@
             "name": "bluestar"
         }
     },
-    "path": "shapes/shapes.json",
+    "path": "shapes.json",
     "name": "Shapes"
 }
