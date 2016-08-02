@@ -8,11 +8,11 @@
     <h1 id="titlebar">Login</h1>
     <p>To perform this action you must authenticate.</p>
     <form method="POST" action="/login" id="login">
-        Username<br/>
-        <input type="text" name="username" value="">
+        <label for="username">Username</label>
+        <input type="text" name="username" value="" id="username">
         <br/>
-        Password<br/>
-        <input type="password" name="password" value="">
+        <label for="password">Password</label>
+        <input type="password" name="password" value="" id="password">
         <br/>
         <input type="submit" name="querybutton" value="LOGIN" id="loginbtn">
         <input type="hidden" name="referrer" value="{{ referrer }}">

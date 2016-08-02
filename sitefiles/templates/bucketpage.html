@@ -8,8 +8,8 @@
 {% block body %}
     <h1 id="titlebar">{{ bucket.name }}</h1>
     <form method="POST" id="searchbox">
-        To search enter your query below <br/>
-        <input type="text" name="query" value="{{ prevsearch }}">
+        <label for="query">To search enter your query below</label><br/>
+        <input type="text" name="query" value="{{ prevsearch }}" id="label">
         <input type="submit" name="querybutton" value="SEARCH" id="searchbtn" class="btn">
     </form>
     {% if empty %}
