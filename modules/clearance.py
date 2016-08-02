@@ -23,25 +23,6 @@ def assignid():
 def user():
     return mastersession[session['id']]
 
-def require_clearance(clearance):
-    def req(pageview):
-        @f.wraps(pageview)
-        def wrapper(*args, **kwargs):
-            try:
-                if user()['authenticated']:
-                    if clearance in userdb[user()['username']]['clearances']:
-                        return pageview(*args, **kwargs)
-                    else:
-                        return render_template('message.html',
-                                title='Access Denied', 
-                                message="You don't have the proper clearance\
-                                to perform this action."), 403
-            except KeyError:
-                pass
-            return render_template('login.html', referrer=url_for(pageview.__name__)), 401
-        return wrapper
-    return req
-
 def check_clearance(clearance, referrer):
     try:
         if user()['authenticated']:
@@ -55,6 +36,19 @@ def check_clearance(clearance, referrer):
     except KeyError:
         pass
     return render_template('login.html', referrer=referrer), 401
+
+def require_clearance(clearance):
+    def req(pageview):
+        @f.wraps(pageview)
+        def wrapper(*args, **kwargs):
+            referrer = url_for(pageview.__name__)
+            check = check_clearance(clearance, referrer)
+            if check:
+                return check
+            else:
+                return pageview(*args, **kwargs)
+        return wrapper
+    return req
 
 def bucket_clearance(clearances):
     def checker(pageview):
