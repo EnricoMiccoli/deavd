@@ -64,14 +64,19 @@ def login(referrer=None):
     sessionid = cl.assignid()
     password = request.form['password']
     username = request.form['username']
+    ip = request.environ['REMOTE_ADDR']
+    cl.user()['ip'] = ip
     try:
         if oc.authenticate(password, cl.userdb[username]['password']):
             cl.user()['username'] = username
             cl.user()['authenticated'] = 1
-            logging.info('%s logged in as %s' % (request.environ['REMOTE_ADDR'], username))
+            logging.info('%s, %s login' % (ip, username))
             return redirect(request.form['referrer'], 302)
     except KeyError:
         oc.authenticate(password, cl.dummy)
+    cl.user()['fails'] += 1
+    if cl.user()['fails'] == 5:
+        logging.warning(user()['ip'] + ' 5 wrong login attemps') 
     return render_template('message.html', title="Invalid credentials")
 
 @app.route('/logout')
@@ -137,9 +142,11 @@ def entpage(bucketname=None, entkey=None):
 @cl.bucket_clearance(BUCKET_CLEARANCES['write'])
 def addtag(bucketname=None, entkey=None):
     try:
+        tagname = request.form['tagname']
         bucket = deavd.loadbucket(bucketname)
-        bucket[entkey].addtag(deavd.Tag(request.form['tagname']))
+        bucket[entkey].addtag(deavd.Tag(tagname))
         bucket.dump()
+        logging.info('%s, %s tagged %s/%s %s' % (user()['ip'], user()['username'], bucketname, entkey, tagname))
     except (FileNotFoundError, KeyError):
         logging.warning('POST at nonexisting %s/%s' % (bucketname, entkey))
         return abort(404)

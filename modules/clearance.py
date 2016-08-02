@@ -2,6 +2,7 @@ import os
 import time
 import functools as f
 import modules.owncrypto as oc
+from modules.config import conf
 from flask import redirect, session, render_template, url_for, abort
 
 mastersession = {} # {id: {key: value}}
@@ -15,7 +16,9 @@ def assignid():
     mastersession[sessionid] = {
             'username': '',
             'authenticated': False,
-            'timestamp': time.monotonic(),
+            'timestamp': time.time(),
+            'ip': '',
+            'fails': 0,
         }
     session['id'] = sessionid
     return sessionid
@@ -25,6 +28,8 @@ def user():
 
 def check_clearance(clearance, referrer):
     try:
+        if time.time() - user()['timestamp'] > conf['maxsessionage']:
+            return render_template('login.html', referrer=referrer), 401
         if user()['authenticated']:
             if clearance in userdb[user()['username']]['clearances']:
                 return False

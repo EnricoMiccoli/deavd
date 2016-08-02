@@ -8,6 +8,7 @@ staticdir: sitefiles/static
 templatedir: sitefiles/templates/
 
 # Clerances
+maxsessionage: 43200 #seconds
 bucketclear:
     read:
         shapes: ''
