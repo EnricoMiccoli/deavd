@@ -22,6 +22,13 @@ Scss(app, asset_dir=conf['scssdir'], static_dir=conf['staticdir'] + '/')
 
 BUCKET_CLEARANCES = conf['bucketclear']
 
+@app.after_request
+def afterrequest(response):
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Server"] = ""
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self' fonts.googleapis.com; frame-ancestor 'none'; font-src fonts.gstatic.com;"
+    return response
+
 @app.route('/theta')
 @cl.require_clearance('theta')
 def theta():
