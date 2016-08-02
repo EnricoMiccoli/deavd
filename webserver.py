@@ -76,7 +76,7 @@ def login(referrer=None):
 
 @app.route('/logout')
 def logoutpage():
-    cl.mastersession.pop(session['id'])
+    cl.mastersession.pop(session['id']) #FIXME
     return render_template('message.html', title="Logged out", message="You have succesfully logged out")
 
 @app.route('/')
@@ -138,9 +138,11 @@ def entpage(bucketname=None, entkey=None):
 def addtag(bucketname=None, entkey=None):
     try:
         bucket = deavd.loadbucket(bucketname)
-        bucket[entkey].addtag(deavd.Tag(request.form['addtag']))
+        bucket[entkey].addtag(deavd.Tag(request.form['tagname']))
+        bucket.dump()
     except (FileNotFoundError, KeyError):
-        abort(404) #TODO log this event
+        logging.warning('POST at nonexisting %s/%s' % (bucketname, entkey))
+        return abort(404)
     return redirect('/b/%s/%s' % (bucketname, entkey))
 
 @app.route('/blobs/<bucketname>/<imagename>')

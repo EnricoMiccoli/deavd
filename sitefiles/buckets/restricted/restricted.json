@@ -73,6 +73,6 @@
             "name": "bluestar"
         }
     },
-    "path": "restricted.json",
+    "path": "restricted/restricted.json",
     "name": "The Restricted Bucket"
 }

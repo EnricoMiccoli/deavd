@@ -31,7 +31,7 @@ class Entity(object):
         if newtag in self.coherence['blacklist']:
             raise TagBlacklistedException(newtag)
         else:
-            self.tags.add(newtag)
+            self.tags.append(newtag)
 
     def serial(self):
         return {'name': self.name,
