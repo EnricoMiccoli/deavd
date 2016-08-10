@@ -9,7 +9,7 @@
     <h1 id="titlebar">{{ bucket.name }}</h1>
     <form method="POST" id="searchbox">
         <label for="query">To search enter your query below</label><br/>
-        <input type="text" name="query" value="{{ prevsearch }}" id="label">
+        <input type="text" name="query" value="{{ prevsearch }}" id="label" placeholder="E.g.: red/blue star">
         <input type="submit" name="querybutton" value="SEARCH" id="searchbtn" class="btn">
     </form>
     {% if empty %}
