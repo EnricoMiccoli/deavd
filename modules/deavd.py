@@ -125,7 +125,10 @@ class Bucket(dict):
                 }
 
     def json(self):
-        return json.dumps(self.serial(), indent=conf['json']['indent'])
+        return json.dumps(self.serial(),
+                indent=conf['json']['indent'],
+                sort_keys=conf['json']['sorted']
+                )
 
     def dump(self):
         with open(PATH + self.path.split('.')[0] + '/' + self.path, 'w') as outfile:

@@ -1,5 +1,10 @@
 # Database
 fileblocksize: 65536 # use for hashing binaries
+imgexts:
+    - jpg
+    - png
+txtexts:
+    - txt
 
 # Directories
 bucketdir: sitefiles/buckets/

@@ -146,16 +146,36 @@ def addtag(bucketname=None, entkey=None):
         bucket = deavd.loadbucket(bucketname)
         bucket[entkey].addtag(deavd.Tag(tagname))
         bucket.dump()
-        logging.info('%s, %s tagged %s/%s %s' % (user()['ip'], user()['username'], bucketname, entkey, tagname))
+        logging.info('%s, %s tagged %s/%s %s' % (cl.user()['ip'], cl.user()['username'], bucketname, entkey, tagname))
     except (FileNotFoundError, KeyError):
         logging.warning('POST at nonexisting %s/%s' % (bucketname, entkey))
         return abort(404)
     return redirect('/b/%s/%s' % (bucketname, entkey))
 
-@app.route('/blobs/<bucketname>/<imagename>')
+@app.route('/blobs/<use>/<bucketname>/<filename>')
 @cl.bucket_clearance(BUCKET_CLEARANCES['read'])
-def serve_image(bucketname=None, imagename=None):
-    return send_file('sitefiles/buckets/%s/%s' % (bucketname, imagename), as_attachment=False)
+def serve_image(bucketname=None, filename=None, use=None):
+    ext = os.path.splitext(filename)[1][1:]
+    if use == 'preview':
+        if ext in conf['imgexts']:
+            return send_file('sitefiles/buckets/%s/%s' % (bucketname, filename),
+                    as_attachment=False)
+        elif ext in conf['txtexts']:
+            return send_file('sitefiles/icons/text.svg', as_attachment=False)
+        else:
+            logging.error('Forbidden filetype %s' % ext)
+    elif use == 'download':
+        if ext in conf['imgexts']:
+            return send_file('sitefiles/buckets/%s/%s' % (bucketname, filename),
+                    as_attachment=True)
+        elif ext in conf['txtexts']:
+            return send_file('sitefiles/buckets/%s/%s' % (bucketname, filename),
+                    as_attachment=True)
+        else:
+            logging.error('Forbidden filetype %s' % ext)
+    else:
+        logging.warning('Unknown usecase %s' % use)
+        return abort(404)
 
 @app.errorhandler(404)
 def page_not_found(e):
