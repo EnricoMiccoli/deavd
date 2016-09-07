@@ -12,14 +12,19 @@ Below are listed all the available templates with their arguments. Args between 
 > Lists all ents in a bucket.
 
 * `bucket` Bucket object as defined in deavd.py
+* `current` the current page as an int, used for pagination.
 * `fbp` Father Bucket Path, the actual path of the bucket the ent belongs to. Since search results are returned as a bucket named 'Results of your query' `fbp` is necessary to properly identify the ent.
+* `keys` keys of the ents to be shown. Used for pagination and querying.
+* `totalpages` range object of total numver of pages needed to display all ents
 * (`empty`) boolean, true if the bucket is empty.
+* (`prevsearch`) string, goes in the search bar.
 
 ## entitypage
 > Showcases an ent along with its tags.
 
 * `ent` Entity object as defined in deavd.py
 * `bucketname` name of the bucket the ent belongs to
+* `bucketurl` url of the parent bucket
 * `fbp`
 
 ## homepage

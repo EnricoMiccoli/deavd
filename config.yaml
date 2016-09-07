@@ -37,3 +37,6 @@ json:
 # Logging
 logfile: deavdviewer.log
 loglevel: debug
+
+# Frontend
+entsperpage: 20

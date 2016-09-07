@@ -16,7 +16,7 @@
         <div id="emptymessage">No results found</div>
     {% else %}
         <ul id="result">
-            {% for key in bucket %}
+            {% for key in keys %}
             <a href="/b/{{ fbp }}/{{ key }}">
                     <li class="result-item">
                         <h3>{{ bucket[key].name }}</h3>
@@ -25,6 +25,15 @@
                 </a>
             {% endfor %}
         </ul>
+        <div id="index">
+            {% for x in totalpages %}
+                {% if x == current %}
+                    <a href="/b/{{ fbp }}/{{ x }}" class="current">{{ x }}</a>
+                {% else %}
+                    <a href="/b/{{ fbp }}/{{ x }}">{{ x }}</a>
+                {% endif %}
+            {% endfor %}
+        </div>
     {% endif %}
 {% endblock %}
 {% block footer %}

@@ -8,7 +8,7 @@ import modules.log
 from  modules.config import conf
 from flask import Flask
 from flask_scss import Scss
-from flask import render_template, redirect, url_for, request, send_file, abort
+from flask import render_template, redirect, url_for, request, send_file, abort, session
 
 app = Flask(__name__,
         static_folder=conf['staticdir'],
@@ -28,16 +28,6 @@ def afterrequest(response):
     response.headers["Server"] = ""
     response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self' fonts.googleapis.com; frame-ancestor 'none'; font-src fonts.gstatic.com;"
     return response
-
-@app.route('/theta')
-@cl.require_clearance('theta')
-def theta():
-    return 'this is theta secret'
-
-@app.route('/delta')
-@cl.require_clearance('delta')
-def delta():
-    return 'this is a delta secret'
 
 @app.route('/test')
 def testpage():
@@ -89,19 +79,48 @@ def homepage():
     bucketnames = os.listdir('sitefiles/buckets')
     return render_template('homepage.html', buckets=bucketnames)
 
-@app.route('/b/<bucketname>')
+@app.route('/b/<bucketname>/<int:page>')
 @cl.bucket_clearance(BUCKET_CLEARANCES['read'])
-def bucketpage(bucketname=None):
+def bucketpage(bucketname=None, page=0):
     try:
         bucket = deavd.loadbucket(bucketname)
         fbp = os.path.splitext(bucket.path)[0] # Father bucket path
     except FileNotFoundError:
         return render_template('nobucketfound.html', bucketname=bucketname)
-    return render_template('bucketpage.html', bucket=bucket, fbp=fbp)
+    epp = conf['entsperpage']
+    try:
+        qks = session['querykeys']
+    except KeyError:
+        session['querykeys'] = []
+        qks = []
+    if qks:
+        if qks == [None]:
+            session['querykeys'] = []
+            return render_template(
+                    'bucketpage.html',
+                    bucket=bucket,
+                    fbp=fbp,
+                    empty=True,
+                    )
+        else:
+            keys = qks[page * epp: (page + 1) * epp]
+            totalpages = len(qks) // epp + (len(qks) % epp != 0) * 1
+    else:
+        keys = list(bucket.keys())[page * epp: (page + 1) * epp]
+        totalpages = len(bucket) // epp + (len(bucket) % epp != 0) * 1
+    session['querykeys'] = []
+    return render_template(
+            'bucketpage.html',
+            bucket=bucket,
+            fbp=fbp,
+            keys=keys,
+            totalpages=range(totalpages),
+            current=page,
+            )
 
-@app.route('/b/<bucketname>', methods=['POST'])
+@app.route('/b/<bucketname>/<int:page>', methods=['POST'])
 @cl.bucket_clearance(BUCKET_CLEARANCES['read'])
-def bucketquery(bucketname=None):
+def bucketquery(bucketname=None, page=0):
     try:
         bucket = deavd.loadbucket(bucketname)
         fbp = os.path.splitext(bucket.path)[0] # Father bucket path
@@ -109,21 +128,16 @@ def bucketquery(bucketname=None):
         return render_template('nobucketfound.html', bucketname=bucketname)
 
     stringquery = request.form['query']
-    if not stringquery: # checks for empty query
-        return render_template('bucketpage.html', bucket=bucket, prevsearch='', fbp=fbp)
-    else:
+    if stringquery:
         query = deavd.parsequery(stringquery)
-        result = deavd.Bucket('Results of your query')
-        try:
-            result.update((key, bucket[key]) for key in bucket.query(query))
-        except QueryError:
-            return 'Invalid operator in query ' + query
-
-        # check if empty
-        if result:
-            return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, fbp=fbp)
+        goodkeys = list(bucket.query(query))
+        if goodkeys:
+            session['querykeys'] = goodkeys
         else:
-            return render_template('bucketpage.html', bucket=result, prevsearch=stringquery, empty=True)
+            session['querykeys'] = [None]
+    else:
+        session['querykeys'] = list(bucket.keys())
+    return redirect('/b/%s/0' % bucketname)
 
 @app.route('/b/<bucketname>/<entkey>')
 @cl.bucket_clearance(BUCKET_CLEARANCES['read'])
@@ -136,7 +150,7 @@ def entpage(bucketname=None, entkey=None):
         entity = bucket[entkey]
     except KeyError:
         return render_template('noentityfound.html', bucketname=bucketname, entityname=entityname)
-    return render_template('entitypage.html', bucketname=bucket.name, fbp=bucketname, ent=entity)
+    return render_template('entitypage.html', bucketname=bucket.name, fbp=bucketname, ent=entity, bucketurl='/b/%s/0' % bucketname)
 
 @app.route('/b/<bucketname>/<entkey>', methods=['POST'])
 @cl.bucket_clearance(BUCKET_CLEARANCES['write'])

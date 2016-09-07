@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body %}
-    <h1 id="titlebar">{{ bucketname }}: {{ ent.name }}</h1>
+    <h1 id="titlebar"><a href="{{ bucketurl }}">{{ bucketname }}</a>: {{ ent.name }}</h1>
     <div id="image-wrapper">
         <img id="image" src="/blobs/preview/{{ fbp }}/{{ ent.path }}" alt="Image for {{ ent.name }}">
     </div>
