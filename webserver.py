@@ -91,10 +91,12 @@ def bucketpage(bucketname=None, page=0):
     try:
         qks = session['querykeys']
     except KeyError:
+        # No previous session
         session['querykeys'] = []
         qks = []
     if qks:
         if qks == [None]:
+            # No results
             session['querykeys'] = []
             return render_template(
                     'bucketpage.html',
@@ -103,12 +105,13 @@ def bucketpage(bucketname=None, page=0):
                     empty=True,
                     )
         else:
+            # Some results
             keys = qks[page * epp: (page + 1) * epp]
             totalpages = len(qks) // epp + (len(qks) % epp != 0) * 1
     else:
+        # Query is empty: show all
         keys = list(bucket.keys())[page * epp: (page + 1) * epp]
         totalpages = len(bucket) // epp + (len(bucket) % epp != 0) * 1
-    session['querykeys'] = []
     return render_template(
             'bucketpage.html',
             bucket=bucket,
@@ -128,7 +131,7 @@ def bucketquery(bucketname=None, page=0):
         return render_template('nobucketfound.html', bucketname=bucketname)
 
     stringquery = request.form['query']
-    if stringquery:
+    if stringquery and not stringquery.isspace():
         query = deavd.parsequery(stringquery)
         goodkeys = list(bucket.query(query))
         if goodkeys:
@@ -136,7 +139,7 @@ def bucketquery(bucketname=None, page=0):
         else:
             session['querykeys'] = [None]
     else:
-        session['querykeys'] = list(bucket.keys())
+        session['querykeys'] = []
     return redirect('/b/%s/0' % bucketname)
 
 @app.route('/b/<bucketname>/<entkey>')
