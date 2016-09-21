@@ -8,6 +8,7 @@ import modules.log
 from  modules.config import conf
 from flask import Flask
 from flask_scss import Scss
+from flask_compress import Compress
 from flask import render_template, redirect, url_for, request, send_file, abort, session
 
 app = Flask(__name__,
@@ -16,6 +17,7 @@ app = Flask(__name__,
         )
 app.debug = conf['debug']
 app.secret_key = os.urandom(conf['secretlength'])
+Compress(app)
 
 Scss(app, asset_dir=conf['scssdir'], static_dir=conf['staticdir'] + '/')
 # I'm not sure about that added slash, but it's necessary

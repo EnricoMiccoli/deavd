@@ -6,6 +6,7 @@ It's written in python3 and uses Flask as a webserver.
 ## Dependencies
 * Flask
 * Flask-Scss
+* flask-compress
 * PyYaml
 * bcrypt
 
